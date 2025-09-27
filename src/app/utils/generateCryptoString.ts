@@ -5,7 +5,7 @@ const generateCryptoString = (length: number): string => {
   //     'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
   const array = new Uint8Array(length - 1);
   crypto.getRandomValues(array);
-  return '#' + Array.from(array, byte => chars[byte % chars.length]).join('');
+  return Array.from(array, byte => chars[byte % chars.length]).join('');
 };
 
 export default generateCryptoString;

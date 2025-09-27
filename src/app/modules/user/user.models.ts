@@ -3,10 +3,15 @@ import config from '../../config';
 import bcrypt from 'bcrypt';
 import { IUser, UserModel } from './user.interface';
 import { Login_With, Role, USER_ROLE } from './user.constants';
+import generateCryptoString from '../../utils/generateCryptoString';
 
 const userSchema: Schema<IUser> = new Schema(
   {
     //basic info
+    id: {
+      type: String,
+      default: generateCryptoString(8),
+    },
     name: {
       type: String,
       required: true,
@@ -92,6 +97,14 @@ const userSchema: Schema<IUser> = new Schema(
     referralCode: {
       type: String,
       default: null,
+    },
+    balance: {
+      type: Number,
+      default: 0,
+    },
+    points: {
+      type: Number,
+      default: 0,
     },
 
     //auth info

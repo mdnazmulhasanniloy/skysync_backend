@@ -2,6 +2,7 @@ import { Model, Types } from 'mongoose';
 
 export interface IUser {
   _id?: Types.ObjectId;
+  id: string;
   status: string;
   name: string;
   email: string;
@@ -17,6 +18,8 @@ export interface IUser {
   referralCode: string;
   fleet: 797 | 777 | 787 | 350 | 380;
   agreements: string;
+  points: number;
+  balance: number;
 
   dateOfBirth: string;
   customerId: string;
