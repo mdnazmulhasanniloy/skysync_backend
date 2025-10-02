@@ -15,7 +15,7 @@ router.post(
   '/',
   upload.single('profile'),
   parseData(),
-  validateRequest(userValidation?.guestValidationSchema),
+  // validateRequest(userValidation?.guestValidationSchema),
   userController.createUser,
 );
 

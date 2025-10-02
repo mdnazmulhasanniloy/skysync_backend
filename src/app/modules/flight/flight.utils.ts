@@ -1,8 +1,8 @@
 import { PipelineStage, Types } from 'mongoose';
-import pickQuery from '../../utils/pickQuery';
-import moment from 'moment';
 import { paginationHelper } from '../../helpers/pagination.helpers';
-import DayOff from './dayOff.models';
+import Flight from './flight.models';
+import moment from 'moment';
+import pickQuery from '../../utils/pickQuery';
 import { User } from '../user/user.models';
 
 interface IResponse {
@@ -13,11 +13,19 @@ interface IResponse {
     total: number;
   };
 }
-export const getAllDayOff = async (
+export const getFlights = async (
   query: Record<string, any>,
 ): Promise<IResponse> => {
   const { filters, pagination } = await pickQuery(query);
-  const { searchTerm, schedulePeriod, fleet, ...filtersData } = filters;
+  const {
+    searchTerm,
+    date,
+    flightNo,
+    fleet,
+    fleetOut,
+    destination,
+    ...filtersData
+  } = filters;
 
   if (filtersData?.author) {
     filtersData['user'] = new Types.ObjectId(filtersData?.user);
@@ -58,18 +66,60 @@ export const getAllDayOff = async (
       });
     }
   }
+  if (fleetOut) {
+    const qur = fleetOut.split(',').map((num: string) => Number(num));
 
-  
-  if (schedulePeriod) {
-    const startOfDay = moment(schedulePeriod).startOf('day').utc().toDate();
-    const endOfDay = moment(schedulePeriod).endOf('day').utc().toDate();
+    const result = await User.aggregate([
+      {
+        $match: {
+          fleet: { $nin: qur },
+        },
+      },
+      {
+        $group: {
+          _id: null,
+          userIds: { $push: '$_id' },
+        },
+      },
+    ]);
+
+    const userIds = result[0]?.userIds || [];
+
+    if (userIds.length) {
+      pipeline.push({
+        $match: {
+          user: { $in: userIds },
+        },
+      });
+    }
+  }
+
+  if (date) {
+    const startOfDay = moment(date).startOf('day').utc().toDate();
+    const endOfDay = moment(date).endOf('day').utc().toDate();
 
     pipeline.push({
       $match: {
-        schedulePeriod: {
-          $gte: startOfDay,
-          $lte: endOfDay,
-        },
+        'schedulePeriod.startAt': { $lte: endOfDay },
+        'schedulePeriod.endAt': { $gte: startOfDay },
+      },
+    });
+  }
+  if (flightNo) {
+    pipeline.push({
+      $match: {
+        $or: [
+          { 'flightInformation.sq1': flightNo },
+          { 'flightInformation.sq2': flightNo },
+        ],
+      },
+    });
+  }
+
+  if (destination) {
+    pipeline.push({
+      $match: {
+        'sector.to': destination,
       },
     });
   }
@@ -168,7 +218,7 @@ export const getAllDayOff = async (
       ],
     },
   });
-  const [result] = await DayOff.aggregate(pipeline);
+  const [result] = await Flight.aggregate(pipeline);
 
   const total = result?.totalData?.[0]?.total || 0;
   const data = result?.paginatedData || [];

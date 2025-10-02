@@ -16,7 +16,7 @@ export interface IUser {
   rank: string;
 
   referralCode: string;
-  fleet: 797 | 777 | 787 | 350 | 380;
+  fleet: number[];
   agreements: string;
   points: number;
   balance: number;

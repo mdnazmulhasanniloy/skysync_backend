@@ -84,12 +84,14 @@ const userSchema: Schema<IUser> = new Schema(
     },
     rank: {
       type: String,
-      required: true,
+      default: null,
     },
-    fleet: {
-      type: Number,
-      enum: [797, 777, 787, 350, 380],
-    },
+    fleet: [
+      {
+        type: Number,
+        enum: [797, 777, 787, 350, 380],
+      },
+    ],
     agreements: {
       type: String,
       default: null,

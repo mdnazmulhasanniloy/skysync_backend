@@ -65,7 +65,9 @@ const getDayOffById = async (id: string) => {
     }
 
     // 2. Fetch from DB
-    const result = await DayOff.findById(id);
+    const result = await DayOff.findById(id).populate([
+      { path: 'user', select: 'id _id email name phoneNumber profile' },
+    ]);
     if (!result || result?.isDeleted) {
       throw new Error('DayOff not found!');
     }
