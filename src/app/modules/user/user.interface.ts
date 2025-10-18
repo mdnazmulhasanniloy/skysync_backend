@@ -1,7 +1,8 @@
-import { Model, Types } from 'mongoose';
+import { Model, ObjectId, Types } from 'mongoose';
 
 export interface IUser {
   _id?: Types.ObjectId;
+  referenceCode?: string;
   id: string;
   status: string;
   name: string;
@@ -16,7 +17,7 @@ export interface IUser {
   rank: string;
 
   referralCode: string;
-  referredBy: string;
+  referredBy: Types.ObjectId;
   fleet: number[];
   agreements: string;
   points: number;
@@ -31,6 +32,7 @@ export interface IUser {
   address?: string;
   needsPasswordChange: boolean;
   passwordChangedAt?: Date;
+  isCompleteFirstSubscribe: boolean;
   isDeleted: boolean;
   expireAt: Date;
   verification: {

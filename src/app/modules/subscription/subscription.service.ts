@@ -18,20 +18,17 @@ const createSubscription = async (payload: ISubscriptions) => {
     return isExist;
   }
 
-  const isFirstSubs = await Subscription.find({
-    user: payload?.user,
-    isPaid: true,
-  });
-
   const packages = await Package.findById(payload.package);
 
   if (!packages) {
     throw new AppError(httpStatus.BAD_REQUEST, 'Package not found');
   }
+
   const user = await User.findById(payload.user);
 
-  if (isFirstSubs?.length > 0 && user?.replaceOne) {
+  if (!user?.isCompleteFirstSubscribe && user?.referredBy) {
     payload.amount = packages?.price * 0.05;
+    payload.isFirstTime = true;
   } else {
     payload.amount = packages.price;
   }
@@ -46,7 +43,10 @@ const createSubscription = async (payload: ISubscriptions) => {
 
 const getAllSubscription = async (query: Record<string, any>) => {
   const subscriptionsModel = new QueryBuilder(
-    Subscription.find({ isDeleted: false }).populate(['package', 'user']),
+    Subscription.find({ isDeleted: false }).populate([
+      'package',
+      { path: 'user', select: 'name email phoneNumber profile' },
+    ]),
     query,
   )
     .search([''])
@@ -64,7 +64,10 @@ const getAllSubscription = async (query: Record<string, any>) => {
 };
 
 const getSubscriptionById = async (id: string) => {
-  const result = await Subscription.findById(id).populate(['package', 'user']);
+  const result = await Subscription.findById(id).populate([
+    'package',
+    { path: 'user', select: 'name email phoneNumber profile' },
+  ]);
   if (!result || result?.isDeleted) {
     throw new Error('Subscription not found');
   }
@@ -74,8 +77,13 @@ const getSubscriptionById = async (id: string) => {
 const getSubscriptionByUserId = async (id: string) => {
   const result = await Subscription.findOne({
     user: new Types.ObjectId(id),
+    isExpired: false,
+    isPaid: true,
     isDeleted: false,
-  }).populate(['package', 'user']);
+  }).populate([
+    'package',
+    { path: 'user', select: 'name email phoneNumber profile' },
+  ]);
 
   return result;
 };

@@ -97,11 +97,15 @@ const userSchema: Schema<IUser> = new Schema(
       default: null,
     },
     // referredUsers: [{ type: Schema.Types.ObjectId, ref: 'User' }],
-    // referralCode: {
-    //   type: String,
-    //   default: null,
-    // },
-    referredBy: { type: String, default: null },
+    referralCode: {
+      type: String,
+      default: generateCryptoString(6),
+    },
+    referredBy: {
+      type: Schema.Types.ObjectId,
+      ref: 'User',
+      default: null,
+    },
     balance: {
       type: Number,
       default: 0,
@@ -167,6 +171,10 @@ const userSchema: Schema<IUser> = new Schema(
       lastLogin: {
         type: String,
       },
+    },
+    isCompleteFirstSubscribe: {
+      type: Boolean,
+      default: false,
     },
     isDeleted: {
       type: Boolean,

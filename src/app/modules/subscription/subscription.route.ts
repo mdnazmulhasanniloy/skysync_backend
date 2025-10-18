@@ -11,21 +11,21 @@ router.post(
   subscriptionController.createSubscription,
 );
 
-router.patch(
-  '/:id',
-  auth(USER_ROLE.user),
-  subscriptionController.updateSubscription,
-);
+// router.patch(
+//   '/:id',
+//   auth(USER_ROLE.user),
+//   subscriptionController.updateSubscription,
+// );
 
-router.delete(
-  '/:id',
-  auth(USER_ROLE.user),
-  subscriptionController.deleteSubscription,
-);
+// router.delete(
+//   '/:id',
+//   auth(USER_ROLE.user),
+//   subscriptionController.deleteSubscription,
+// );
 
 router.get(
   '/user/:userId',
-  auth(USER_ROLE?.user, USER_ROLE.admin),
+  auth(USER_ROLE.admin, USER_ROLE.sub_admin, USER_ROLE.super_admin),
   subscriptionController.getSubscriptionByUserId,
 );
 router.get(
@@ -33,7 +33,16 @@ router.get(
   auth(USER_ROLE.user),
   subscriptionController.getMySubscription,
 );
-router.get('/:id', subscriptionController.getSubscriptionById);
-router.get('/', subscriptionController.getAllSubscription);
+router.get(
+  '/:id',
+  auth(
+    USER_ROLE.admin,
+    USER_ROLE.sub_admin,
+    USER_ROLE.super_admin,
+    USER_ROLE.user,
+  ),
+  subscriptionController.getSubscriptionById,
+);
+// router.get('/', subscriptionController.getAllSubscription);
 
 export const subscriptionRoutes = router;
