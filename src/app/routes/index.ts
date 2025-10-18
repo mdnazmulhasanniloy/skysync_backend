@@ -8,6 +8,7 @@ import { packageRoutes } from '../modules/package/package.route';
 import { subscriptionRoutes } from '../modules/subscription/subscription.route';
 import { feedbackRoutes } from '../modules/feedback/feedback.route';
 import { paymentsRoutes } from '../modules/payments/payments.route';
+import { referralRewardsRoutes } from '../modules/referralRewards/referralRewards.route';
 
 const router = Router();
 const moduleRoutes = [
@@ -46,6 +47,10 @@ const moduleRoutes = [
   {
     path: '/feedback',
     route: feedbackRoutes,
+  },
+  {
+    path: '/referral-rewords',
+    route: referralRewardsRoutes,
   },
 ];
 moduleRoutes.forEach(route => router.use(route.path, route.route));

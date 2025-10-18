@@ -18,7 +18,7 @@ const createUser = async (payload: IUser): Promise<IUser> => {
   let referredBy;
   const isExist = await User.isUserExist(payload.email as string);
 
-  if (isExist && !isExist?.verification?.status) {
+  if (isExist && !isExist?.verification?.status && payload?.password) {
     const { email, ...updateData } = payload;
     updateData.password = await bcrypt.hash(
       payload?.password,

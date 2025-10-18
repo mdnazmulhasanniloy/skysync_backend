@@ -9,14 +9,14 @@ export interface IUser {
   email: string;
   bio: string;
   phoneNumber: string;
-  password: string;
+  password?: string;
   privacySettings: boolean;
 
   // profile Details
   gender: 'Male' | 'Female' | 'Others';
   rank: string;
 
-  referralCode: string; 
+  referralCode: string;
   fleet: number[];
   agreements: string;
   points: number;
@@ -30,7 +30,7 @@ export interface IUser {
   isGoogleLogin: boolean;
   address?: string;
   needsPasswordChange: boolean;
-  passwordChangedAt?: Date; 
+  passwordChangedAt?: Date;
   isDeleted: boolean;
   expireAt: Date;
   verification: {

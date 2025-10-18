@@ -1,47 +1,50 @@
-import { Error, Query, Schema, model } from 'mongoose';
-import config from '../../config';
+import { Schema, model } from 'mongoose';
 import bcrypt from 'bcrypt';
+import config from '../../config';
 import { IUser, UserModel } from './user.interface';
 import { Login_With, Role, USER_ROLE } from './user.constants';
 import generateCryptoString from '../../utils/generateCryptoString';
 
-const userSchema: Schema<IUser> = new Schema(
+const userSchema = new Schema<IUser>(
   {
-    //basic info
+    // Basic info
     id: {
       type: String,
-      default: generateCryptoString(8),
+      default: () => generateCryptoString(8),
     },
 
     name: {
       type: String,
-      required: true,
-      default: null,
+      required: [true, 'User name is required'],
+      trim: true,
     },
 
     email: {
       type: String,
-      required: true,
+      required: [true, 'Email is required'],
       trim: true,
       unique: true,
+      lowercase: true,
+      validate: {
+        validator: (v: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v),
+        message: (props: any) => `${props.value} is not a valid email!`,
+      },
     },
 
     password: {
       type: String,
       required: false,
+      select: false, // Don't return password by default
     },
 
     role: {
       type: String,
-      enum: Role,
+      enum: Object.values(Role),
       default: USER_ROLE.user,
     },
 
-    //profile info
-    profile: {
-      type: String,
-      default: null,
-    },
+    // Profile info
+    profile: { type: String, default: null },
 
     gender: {
       type: String,
@@ -49,75 +52,50 @@ const userSchema: Schema<IUser> = new Schema(
       default: null,
     },
 
-    dateOfBirth: {
-      type: String,
-      default: null,
-    },
+    dateOfBirth: { type: String, default: null },
 
     phoneNumber: {
       type: String,
-      required: false,
       unique: true,
-      sparse: true,
+      sparse: true, // allow multiple null values
       trim: true,
       validate: {
-        validator: function (v: string) {
-          return /^(\+?\d{8,15})$/.test(v);
-        },
+        validator: (v: string) => !v || /^(\+?\d{8,15})$/.test(v),
         message: (props: any) => `${props.value} is not a valid phone number!`,
       },
       default: null,
     },
-    
-    address: {
-      type: String,
-      default: null,
-    },
 
-    //extra info
-    customerId: {
-      type: String,
-      default: null,
-    },
-    privacySettings: {
-      type: Boolean,
-      default: true,
-    },
-    bio: {
-      type: String,
-      default: null,
-    },
-    rank: {
-      type: String,
-      default: null,
-    },
+    address: { type: String, default: null },
+
+    // Extra info
+    customerId: { type: String, default: null },
+    privacySettings: { type: Boolean, default: true },
+    bio: { type: String, default: null },
+    rank: { type: String, default: null },
+
     fleet: [
       {
         type: Number,
         enum: [797, 777, 787, 350, 380],
       },
     ],
-    agreements: {
-      type: String,
-      default: null,
-    },
+
+    agreements: { type: String, default: null },
+
     referralCode: {
       type: String,
-      default: generateCryptoString(6),
-    },
-    balance: {
-      type: Number,
-      default: 0,
-    },
-    points: {
-      type: Number,
-      default: 0,
+      default: () => generateCryptoString(8),
+      unique: true,
     },
 
-    //auth info
+    balance: { type: Number, default: 0 },
+    points: { type: Number, default: 0 },
+
+    // Auth info
     loginWth: {
       type: String,
-      enum: Login_With,
+      enum: Object.values(Login_With),
       default: Login_With.credentials,
     },
 
@@ -129,16 +107,17 @@ const userSchema: Schema<IUser> = new Schema(
 
     expireAt: {
       type: Date,
-      default: () => {
-        const expireAt = new Date();
-        return expireAt.setMinutes(expireAt.getMinutes() + 20);
-      },
+      default: () => new Date(Date.now() + 20 * 60 * 1000), // 20 min from now
     },
+
     needsPasswordChange: {
       type: Boolean,
+      default: false,
     },
+
     passwordChangedAt: {
       type: Date,
+      default: null,
     },
 
     verification: {
@@ -148,29 +127,22 @@ const userSchema: Schema<IUser> = new Schema(
       },
       expiresAt: {
         type: Date,
+        default: null,
       },
       status: {
         type: Boolean,
         default: false,
       },
     },
+
     device: {
-      ip: {
-        type: String,
-      },
-      browser: {
-        type: String,
-      },
-      os: {
-        type: String,
-      },
-      device: {
-        type: String,
-      },
-      lastLogin: {
-        type: String,
-      },
+      ip: String,
+      browser: String,
+      os: String,
+      device: String,
+      lastLogin: String,
     },
+
     isDeleted: {
       type: Boolean,
       default: false,
@@ -178,43 +150,43 @@ const userSchema: Schema<IUser> = new Schema(
   },
   {
     timestamps: true,
+    versionKey: false,
   },
 );
 
+// 🔹 TTL index for expireAt (e.g., temporary users)
 userSchema.index({ expireAt: 1 }, { expireAfterSeconds: 0 });
-userSchema.pre('save', async function (next) {
-  const user = this;
-  if (this.password) {
-    user.password = await bcrypt.hash(
-      user.password,
-      Number(config.bcrypt_salt_rounds),
-    );
-  }
 
+/* --------------------------- PASSWORD HASHING --------------------------- */
+userSchema.pre('save', async function (next) {
+  if (this.isModified('password') && this.password) {
+    const saltRounds = Number(config.bcrypt_salt_rounds) || 10;
+    this.password = await bcrypt.hash(this.password, saltRounds);
+  }
   next();
 });
-// set '' after saving password
-userSchema.post(
-  'save',
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  function (error: Error, doc: any, next: (error?: Error) => void): void {
-    doc.password = '';
-    next();
-  },
-);
 
+/* --------------------------- PASSWORD HIDE AFTER SAVE --------------------------- */
+userSchema.post('save', function (doc, next) {
+  doc.password = undefined;
+  next();
+});
+
+/* --------------------------- STATIC METHODS --------------------------- */
 userSchema.statics.isUserExist = async function (email: string) {
-  return await User.findOne({ email: email }).select('+password');
+  return await this.findOne({ email }).select('+password');
 };
 
 userSchema.statics.IsUserExistId = async function (id: string) {
-  return await User.findById(id).select('+password');
+  return await this.findById(id).select('+password');
 };
+
 userSchema.statics.isPasswordMatched = async function (
-  plainTextPassword,
-  hashedPassword,
-) {
+  plainTextPassword: string,
+  hashedPassword: string,
+): Promise<boolean> {
   return await bcrypt.compare(plainTextPassword, hashedPassword);
 };
 
+/* --------------------------- MODEL EXPORT --------------------------- */
 export const User = model<IUser, UserModel>('User', userSchema);
