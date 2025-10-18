@@ -1,0 +1,115 @@
+import httpStatus from 'http-status';
+import AppError from '../../error/AppError';
+import { ISubscriptions } from './subscription.interface';
+import Subscription from './subscription.models';
+import { Types } from 'mongoose';
+import Package from '../package/package.models';
+import QueryBuilder from '../../class/builder/QueryBuilder';
+import { User } from '../user/user.models';
+
+const createSubscription = async (payload: ISubscriptions) => {
+  const isExist = await Subscription.findOne({
+    user: payload.user,
+    package: payload.package,
+    isPaid: false,
+  });
+
+  if (isExist) {
+    return isExist;
+  }
+
+  const isFirstSubs = await Subscription.find({
+    user: payload?.user,
+    isPaid: true,
+  });
+
+  const packages = await Package.findById(payload.package);
+
+  if (!packages) {
+    throw new AppError(httpStatus.BAD_REQUEST, 'Package not found');
+  }
+  const user = await User.findById(payload.user);
+
+  if (isFirstSubs?.length > 0 && user?.replaceOne) {
+    payload.amount = packages?.price * 0.05;
+  } else {
+    payload.amount = packages.price;
+  }
+
+  const result = await Subscription.create(payload);
+  if (!result) {
+    throw new Error('Failed to create subscription');
+  }
+
+  return result;
+};
+
+const getAllSubscription = async (query: Record<string, any>) => {
+  const subscriptionsModel = new QueryBuilder(
+    Subscription.find({ isDeleted: false }).populate(['package', 'user']),
+    query,
+  )
+    .search([''])
+    .filter()
+    .paginate()
+    .sort()
+    .fields();
+
+  const data = await subscriptionsModel.modelQuery;
+  const meta = await subscriptionsModel.countTotal();
+  return {
+    data,
+    meta,
+  };
+};
+
+const getSubscriptionById = async (id: string) => {
+  const result = await Subscription.findById(id).populate(['package', 'user']);
+  if (!result || result?.isDeleted) {
+    throw new Error('Subscription not found');
+  }
+  return result;
+};
+
+const getSubscriptionByUserId = async (id: string) => {
+  const result = await Subscription.findOne({
+    user: new Types.ObjectId(id),
+    isDeleted: false,
+  }).populate(['package', 'user']);
+
+  return result;
+};
+
+const updateSubscription = async (
+  id: string,
+  payload: Partial<ISubscriptions>,
+) => {
+  const result = await Subscription.findByIdAndUpdate(id, payload, {
+    new: true,
+  });
+  if (!result) {
+    throw new Error('Failed to update subscription');
+  }
+  return result;
+};
+
+const deleteSubscription = async (id: string) => {
+  const result = await Subscription.findByIdAndUpdate(
+    id,
+    { isDeleted: true },
+    { new: true },
+  );
+  if (!result) {
+    throw new Error('Failed to delete subscription');
+  }
+  return result;
+};
+
+export const subscriptionService = {
+  createSubscription,
+  getAllSubscription,
+  getSubscriptionById,
+  updateSubscription,
+  deleteSubscription,
+  getSubscriptionByUserId,
+};

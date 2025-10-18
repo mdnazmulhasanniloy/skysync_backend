@@ -96,10 +96,12 @@ const userSchema: Schema<IUser> = new Schema(
       type: String,
       default: null,
     },
-    referralCode: {
-      type: String,
-      default: null,
-    },
+    // referredUsers: [{ type: Schema.Types.ObjectId, ref: 'User' }],
+    // referralCode: {
+    //   type: String,
+    //   default: null,
+    // },
+    referredBy: { type: String, default: null },
     balance: {
       type: Number,
       default: 0,

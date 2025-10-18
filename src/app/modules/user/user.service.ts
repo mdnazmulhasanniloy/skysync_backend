@@ -48,10 +48,21 @@ const createUser = async (payload: IUser): Promise<IUser> => {
     throw new AppError(httpStatus.BAD_REQUEST, 'Password is required');
   }
 
+  if (payload?.referredBy) {
+    const referredByUser = await User.findOne({
+      referralCode: payload?.referredBy,
+    });
+    if(!referredByUser){
+      throw new AppError(httpStatus.BAD_REQUEST, "this reference code is not valid")
+    }
+    payload.referralCode = referredByUser.referralCode
+ 
+  }
   const user = await User.create(payload);
   if (!user) {
     throw new AppError(httpStatus.BAD_REQUEST, 'User creation failed');
   }
+  
   return user;
 };
 

@@ -5,6 +5,8 @@ import { authRoutes } from '../modules/auth/auth.route';
 import { notificationRoutes } from '../modules/notification/notificaiton.route';
 import { contentsRoutes } from '../modules/contents/contents.route';
 import { packageRoutes } from '../modules/package/package.route';
+import { subscriptionRoutes } from '../modules/subscription/subscription.route';
+import { feedbackRoutes } from '../modules/feedback/feedback.route';
 
 const router = Router();
 const moduleRoutes = [
@@ -31,6 +33,14 @@ const moduleRoutes = [
   {
     path: '/package',
     route: packageRoutes,
+  },
+  {
+    path: '/subscriptions',
+    route: subscriptionRoutes,
+  },
+  {
+    path: '/feedback',
+    route: feedbackRoutes,
   },
 ];
 moduleRoutes.forEach(route => router.use(route.path, route.route));
