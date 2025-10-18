@@ -3,7 +3,7 @@ import httpStatus from 'http-status';
 import AppError from '../../error/AppError';
 import Contents from './contents.models';
 import { IContents } from './contents.interface';
-import QueryBuilder from '../../class/builder/QueryBuilder';
+import QueryBuilder from '../../core/builder/QueryBuilder';
 import { deleteManyFromS3, uploadManyToS3 } from '../../utils/s3';
 import { UploadedFiles } from '../../interface/common.interface';
 

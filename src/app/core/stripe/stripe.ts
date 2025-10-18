@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { Stripe as StripeType } from 'stripe';
 import config from '../../config';
 interface IProducts {
@@ -5,7 +7,7 @@ interface IProducts {
   name: string;
   quantity: number;
 }
-class StripeService<T> {
+class StripeServices<T> {
   private stripe() {
     return new StripeType(config.stripe?.stripe_api_secret as string, {
       apiVersion: '2024-06-20',
@@ -13,10 +15,10 @@ class StripeService<T> {
     });
   }
 
-  private handleError(error: unknown, message: string): never {
+  private handleError(error: any, message: string): never {
     if (error instanceof StripeType.errors.StripeError) {
-      console.error('Stripe Error:', error.message);
-      throw new Error(`Stripe Error: ${message} - ${error.message}`);
+      console.error('Stripe Error:', error?.message);
+      throw new Error(`Stripe Error: ${message} - ${error?.message}`);
     } else if (error instanceof Error) {
       console.error('Error:', error.message);
       throw new Error(`${message} - ${error.message}`);
@@ -27,14 +29,15 @@ class StripeService<T> {
     }
   }
 
-  public async connectAccount(returnUrl: string, refreshUrl: string) {
+  public async connectAccount(
+    returnUrl: string,
+    refreshUrl: string,
+    accountId: string,
+  ) {
+    console.log({ returnUrl, refreshUrl, accountId });
     try {
-      const account = await this.stripe().accounts.create({
-        // email: user?.email, (optional: uncomment if you want to pass user's email)
-      });
-
       const accountLink = await this.stripe().accountLinks.create({
-        account: account.id,
+        account: accountId,
         return_url: returnUrl,
         refresh_url: refreshUrl,
         type: 'account_onboarding',
@@ -70,7 +73,7 @@ class StripeService<T> {
     try {
       const balance = await this.stripe().balance.retrieve();
       const availableBalance = balance.available.reduce(
-        (total, bal) => total + bal.amount,
+        (total: number, bal: { amount: number }) => total + bal.amount,
         0,
       );
 
@@ -89,11 +92,16 @@ class StripeService<T> {
     }
   }
 
-  public async refund(payment_intent: string, amount: number) {
+  public async refund(payment_intent: string, amount?: number) {
     try {
+      if (amount) {
+        return await this.stripe().refunds.create({
+          payment_intent: payment_intent,
+          amount: Math.round(amount),
+        });
+      }
       return await this.stripe().refunds.create({
         payment_intent: payment_intent,
-        amount: Math.round(amount),
       });
     } catch (error) {
       this.handleError(error, 'Error processing refund');
@@ -108,10 +116,9 @@ class StripeService<T> {
     }
   }
 
-  public async getPaymentStatus(session_id: string) {
+  public async getPaymentSession(session_id: string) {
     try {
-      return (await this.stripe().checkout.sessions.retrieve(session_id))
-        .status;
+      return await this.stripe().checkout.sessions.retrieve(session_id);
       // return (await this.stripe().paymentIntents.retrieve(intents_id)).status;
     } catch (error) {
       this.handleError(error, 'Error retrieving payment status');
@@ -133,9 +140,9 @@ class StripeService<T> {
     product: IProducts,
     success_url: string,
     cancel_url: string,
+    customer: string = '', // Optional: customer ID for Stripe
     currency: string = 'usd',
     payment_method_types: Array<'card' | 'paypal' | 'ideal'> = ['card'],
-    customer: string = '', // Optional: customer ID for Stripe
   ) {
     try {
       if (!product?.name || !product?.amount || !product?.quantity) {
@@ -151,7 +158,7 @@ class StripeService<T> {
               product_data: {
                 name: product?.name,
               },
-              unit_amount: product?.amount * 100,
+              unit_amount: parseFloat((product?.amount * 100).toFixed(2)),
             },
             quantity: product?.quantity,
           },
@@ -183,9 +190,40 @@ class StripeService<T> {
       this.handleError(error, 'Error creating checkout session');
     }
   }
+
+  public async getExchangeRateQuote(
+    sourceCurrency: string,
+    targetCurrency: string,
+    amount: number,
+  ) {
+    try {
+      const res = await fetch(
+        `https://api.exchangerate.host/convert?access_key=${config.stripe.stripe_api_key}&from=${sourceCurrency}&to=${targetCurrency}&amount=${amount}`,
+      );
+      const data = await res.json();
+      return Math.round(data.result * 100);
+    } catch (error) {
+      this.handleError(error, 'Error creating checkout session');
+    }
+  }
+
+  public async createCustomer(email: string, name: string) {
+    try {
+      return await this.stripe().customers.create({
+        email,
+        name,
+        //   description: 'HandyHub.pro Customer', // Optional: for dashboard reference
+        //   metadata: {
+        //     platform: 'HandyHub.pro', // Custom metadata for tracking
+        //   },
+      });
+    } catch (error) {
+      this.handleError(error, 'customer creation failed');
+    }
+  }
   public getStripe() {
     return this.stripe();
   }
 }
-
-export default new StripeService();
+const StripeService = new StripeServices();
+export default StripeService;

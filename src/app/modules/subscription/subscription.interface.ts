@@ -1,8 +1,10 @@
 import { Model, ObjectId } from 'mongoose';
 import { IPackage } from '../package/package.interface';
+import { IUser } from '../user/user.interface';
 
 export interface ISubscriptions {
-  user: ObjectId;
+  _id?: ObjectId | string;
+  user: ObjectId | IUser;
   package: ObjectId | IPackage;
   isPaid: boolean;
   trnId: string;

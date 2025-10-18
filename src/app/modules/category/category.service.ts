@@ -2,7 +2,7 @@
 import httpStatus from 'http-status';
 import { ICategory } from './category.interface';
 import Category from './category.models';
-import QueryBuilder from '../../class/builder/QueryBuilder';
+import QueryBuilder from '../../core/builder/QueryBuilder';
 import AppError from '../../error/AppError';
 
 const createCategory = async (payload: ICategory) => {

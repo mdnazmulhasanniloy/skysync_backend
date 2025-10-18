@@ -3,7 +3,7 @@ import config from '../../config';
 import { User } from '../user/user.models';
 import AppError from '../../error/AppError';
 import httpStatus from 'http-status';
-import StripeService from '../../class/stripe/stripe';
+import StripeService from '../../core/stripe/stripe';
 
 // Create Stripe account and return the account link URL
 const stripLinkAccount = async (userId: string) => {

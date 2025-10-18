@@ -1,7 +1,7 @@
 import httpStatus from 'http-status';
 import { IProducts } from './products.interface';
 import Products from './products.models';
-import QueryBuilder from '../../class/builder/QueryBuilder';
+import QueryBuilder from '../../core/builder/QueryBuilder';
 import AppError from '../../error/AppError';
 import { UploadedFiles } from '../../interface/common.interface';
 import { uploadManyToS3 } from '../../utils/s3';

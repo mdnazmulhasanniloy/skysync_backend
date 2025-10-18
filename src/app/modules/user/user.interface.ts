@@ -16,8 +16,7 @@ export interface IUser {
   gender: 'Male' | 'Female' | 'Others';
   rank: string;
 
-  referralCode: string;
-  referredBy: Types.ObjectId;
+  referralCode: string; 
   fleet: number[];
   agreements: string;
   points: number;
@@ -31,8 +30,7 @@ export interface IUser {
   isGoogleLogin: boolean;
   address?: string;
   needsPasswordChange: boolean;
-  passwordChangedAt?: Date;
-  isCompleteFirstSubscribe: boolean;
+  passwordChangedAt?: Date; 
   isDeleted: boolean;
   expireAt: Date;
   verification: {

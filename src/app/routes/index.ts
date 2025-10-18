@@ -7,6 +7,7 @@ import { contentsRoutes } from '../modules/contents/contents.route';
 import { packageRoutes } from '../modules/package/package.route';
 import { subscriptionRoutes } from '../modules/subscription/subscription.route';
 import { feedbackRoutes } from '../modules/feedback/feedback.route';
+import { paymentsRoutes } from '../modules/payments/payments.route';
 
 const router = Router();
 const moduleRoutes = [
@@ -37,6 +38,10 @@ const moduleRoutes = [
   {
     path: '/subscriptions',
     route: subscriptionRoutes,
+  },
+  {
+    path: '/payments',
+    route: paymentsRoutes,
   },
   {
     path: '/feedback',

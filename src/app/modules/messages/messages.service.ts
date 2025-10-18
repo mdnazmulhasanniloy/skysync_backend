@@ -5,7 +5,7 @@ import { deleteFromS3 } from '../../utils/s3';
 import { IMessages } from './messages.interface';
 import Chat from '../chat/chat.models';
 import { chatService } from '../chat/chat.service';
-import QueryBuilder from '../../class/builder/QueryBuilder';
+import QueryBuilder from '../../core/builder/QueryBuilder';
 
 const createMessages = async (payload: IMessages) => {
   const alreadyExists = await Chat.findOne({

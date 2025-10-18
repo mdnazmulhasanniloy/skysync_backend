@@ -4,8 +4,10 @@ import { ISubscriptions } from './subscription.interface';
 import Subscription from './subscription.models';
 import { Types } from 'mongoose';
 import Package from '../package/package.models';
-import QueryBuilder from '../../class/builder/QueryBuilder';
+import QueryBuilder from '../../core/builder/QueryBuilder';
 import { User } from '../user/user.models';
+import ReferralRewards from '../referralRewards/referralRewards.models';
+import { REFERRAL_REWARDS } from '../referralRewards/referralRewards.constants';
 
 const createSubscription = async (payload: ISubscriptions) => {
   const isExist = await Subscription.findOne({
@@ -23,11 +25,14 @@ const createSubscription = async (payload: ISubscriptions) => {
   if (!packages) {
     throw new AppError(httpStatus.BAD_REQUEST, 'Package not found');
   }
+ 
+  const isHaveReferralRewords = await ReferralRewards.findOne({
+    referredUser: payload?.user,
+    status: REFERRAL_REWARDS.pending,
+  });
 
-  const user = await User.findById(payload.user);
-
-  if (!user?.isCompleteFirstSubscribe && user?.referredBy) {
-    payload.amount = packages?.price * 0.05;
+  if (isHaveReferralRewords) {
+    payload.amount = Number(packages?.price) - 5;
     payload.isFirstTime = true;
   } else {
     payload.amount = packages.price;

@@ -1,7 +1,7 @@
 import httpStatus from 'http-status';
 import { IPackage } from './package.interface';
 import Package from './package.models';
-import QueryBuilder from '../../class/builder/QueryBuilder';
+import QueryBuilder from '../../core/builder/QueryBuilder';
 import AppError from '../../error/AppError';
 import { pubClient } from '../../redis';
 

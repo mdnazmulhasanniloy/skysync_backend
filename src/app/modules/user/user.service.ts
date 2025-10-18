@@ -4,9 +4,10 @@ import httpStatus from 'http-status';
 import AppError from '../../error/AppError';
 import { IUser } from './user.interface';
 import { User } from './user.models';
-import QueryBuilder from '../../class/builder/QueryBuilder';
+import QueryBuilder from '../../core/builder/QueryBuilder';
 import bcrypt from 'bcrypt';
 import config from '../../config';
+import ReferralRewards from '../referralRewards/referralRewards.models';
 
 export type IFilter = {
   searchTerm?: string;
@@ -14,6 +15,7 @@ export type IFilter = {
   [key: string]: any;
 };
 const createUser = async (payload: IUser): Promise<IUser> => {
+  let referredBy;
   const isExist = await User.isUserExist(payload.email as string);
 
   if (isExist && !isExist?.verification?.status) {
@@ -58,13 +60,20 @@ const createUser = async (payload: IUser): Promise<IUser> => {
         'this reference code is not valid',
       );
     }
-    payload.referredBy = referredByUser._id;
+
+    referredBy = referredByUser?._id;
   }
+
   const user = await User.create(payload);
   if (!user) {
     throw new AppError(httpStatus.BAD_REQUEST, 'User creation failed');
   }
-
+  if (payload?.referenceCode && referredBy) {
+    await ReferralRewards.create({
+      referrer: referredBy,
+      referredUser: user?._id,
+    });
+  }
   return user;
 };
 

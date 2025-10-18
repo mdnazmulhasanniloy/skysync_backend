@@ -12,6 +12,7 @@ const userSchema: Schema<IUser> = new Schema(
       type: String,
       default: generateCryptoString(8),
     },
+
     name: {
       type: String,
       required: true,
@@ -29,6 +30,7 @@ const userSchema: Schema<IUser> = new Schema(
       type: String,
       required: false,
     },
+
     role: {
       type: String,
       enum: Role,
@@ -46,10 +48,12 @@ const userSchema: Schema<IUser> = new Schema(
       enum: ['Male', 'Female', 'Others'],
       default: null,
     },
+
     dateOfBirth: {
       type: String,
       default: null,
     },
+
     phoneNumber: {
       type: String,
       required: false,
@@ -64,6 +68,7 @@ const userSchema: Schema<IUser> = new Schema(
       },
       default: null,
     },
+    
     address: {
       type: String,
       default: null,
@@ -96,15 +101,9 @@ const userSchema: Schema<IUser> = new Schema(
       type: String,
       default: null,
     },
-    // referredUsers: [{ type: Schema.Types.ObjectId, ref: 'User' }],
     referralCode: {
       type: String,
       default: generateCryptoString(6),
-    },
-    referredBy: {
-      type: Schema.Types.ObjectId,
-      ref: 'User',
-      default: null,
     },
     balance: {
       type: Number,
@@ -171,10 +170,6 @@ const userSchema: Schema<IUser> = new Schema(
       lastLogin: {
         type: String,
       },
-    },
-    isCompleteFirstSubscribe: {
-      type: Boolean,
-      default: false,
     },
     isDeleted: {
       type: Boolean,
