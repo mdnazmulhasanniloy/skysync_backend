@@ -5,7 +5,7 @@ const flightSchema = new Schema<IFlight>(
   {
     user: {
       type: Types.ObjectId,
-      ref: 'user',
+      ref: 'User',
       required: true,
     },
     schedulePeriod: {

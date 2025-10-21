@@ -27,8 +27,13 @@ const feedbackSchema = new Schema<IFeedback>(
       enum: ['unread', 'resolved'],
       default: FEEDBACK_STATUS.unread,
     },
+    adminResponse:{
+      type: String,
+      default: null,
+    },
     howCanWeContact: {
       type: String,
+      enum:["Email", "Phone", "N/A"],
       required: true,
     },
     message: {

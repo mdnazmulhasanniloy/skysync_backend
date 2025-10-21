@@ -15,8 +15,8 @@ router.post(
 );
 router.patch(
   '/resolved/:id',
-  auth(USER_ROLE.admin, USER_ROLE.sub_admin, USER_ROLE.super_admin), 
-  feedbackController.makeResolved,
+  auth(USER_ROLE.admin, USER_ROLE.sub_admin, USER_ROLE.super_admin),
+  feedbackController.adminResponse,
 );
 router.patch(
   '/:id',

@@ -9,6 +9,8 @@ import { subscriptionRoutes } from '../modules/subscription/subscription.route';
 import { feedbackRoutes } from '../modules/feedback/feedback.route';
 import { paymentsRoutes } from '../modules/payments/payments.route';
 import { referralRewardsRoutes } from '../modules/referralRewards/referralRewards.route';
+import { dayOffRoutes } from '../modules/dayOff/dayOff.route';
+import { flightRoutes } from '../modules/flight/flight.route';
 
 const router = Router();
 const moduleRoutes = [
@@ -51,6 +53,14 @@ const moduleRoutes = [
   {
     path: '/referral-rewords',
     route: referralRewardsRoutes,
+  },
+  {
+    path: '/day-off',
+    route: dayOffRoutes,
+  },
+  {
+    path: '/flights',
+    route: flightRoutes,
   },
 ];
 moduleRoutes.forEach(route => router.use(route.path, route.route));

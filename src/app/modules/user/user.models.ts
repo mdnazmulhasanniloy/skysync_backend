@@ -77,7 +77,7 @@ const userSchema = new Schema<IUser>(
     fleet: [
       {
         type: Number,
-        enum: [797, 777, 787, 350, 380],
+        enum: [797, 777, 787, 350, 380, 737],
       },
     ],
 

@@ -26,7 +26,7 @@ import firebaseAdmin from '../../utils/firebase';
 // Login
 const login = async (payload: TLogin, req: Request) => {
   const user: IUser | null = await User.isUserExist(payload?.email);
-  if (!user) {
+  if (!user || !user?.password) {
     throw new AppError(httpStatus.NOT_FOUND, 'User not found');
   }
 
@@ -92,7 +92,7 @@ const login = async (payload: TLogin, req: Request) => {
 // Change password
 const changePassword = async (id: string, payload: TChangePassword) => {
   const user = await User.IsUserExistId(id);
-  if (!user) {
+  if (!user || !user?.password) {
     throw new AppError(httpStatus.NOT_FOUND, 'User not found');
   }
 
@@ -168,7 +168,7 @@ const forgotPassword = async (email: string) => {
     'Your reset password OTP is',
     fs
       .readFileSync(otpEmailPath, 'utf8')
-      .replace('{{otpCode}}', otp)
+      .replace('{{otp}}', otp)
       .replace('{{fullName}}', user?.name)
       .replace(
         '{{resetUrl}}',

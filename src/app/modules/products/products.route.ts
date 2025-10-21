@@ -13,7 +13,7 @@ const upload = multer({ storage });
 
 router.post(
   '/',
-  auth(USER_ROLE.vendor),
+  auth(USER_ROLE.user),
   upload.fields([{ name: 'images', maxCount: 10 }]),
   parseData(),
   validateRequest(productValidation.createProductSchema),
@@ -21,7 +21,7 @@ router.post(
 );
 router.patch(
   '/:id',
-  auth(USER_ROLE.vendor, USER_ROLE.admin),
+  auth(USER_ROLE.user, USER_ROLE.admin),
   upload.fields([{ name: 'images', maxCount: 10 }]),
   parseData(),
   validateRequest(productValidation.createProductSchema),
@@ -29,12 +29,12 @@ router.patch(
 );
 router.delete(
   '/:id',
-  auth(USER_ROLE.vendor, USER_ROLE.admin),
+  auth(USER_ROLE.user, USER_ROLE.admin),
   productsController.deleteProducts,
 );
 router.get(
   '/my-products',
-  auth(USER_ROLE.vendor),
+  auth(USER_ROLE.user),
   productsController.getMyProducts,
 );
 router.get('/:id', productsController.getProductsById);

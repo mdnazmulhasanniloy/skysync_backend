@@ -4,6 +4,11 @@ import Feedback from './feedback.models';
 import QueryBuilder from '../../core/builder/QueryBuilder';
 import AppError from '../../error/AppError';
 import { pubClient } from '../../redis';
+import path from 'path';
+import { sendEmail } from '../../utils/mailSender';
+import fs from 'fs';
+import { IUser } from '../user/user.interface';
+import { FEEDBACK_STATUS } from './feedback.constants';
 
 const createFeedback = async (payload: IFeedback) => {
   const result = await Feedback.create(payload);
@@ -126,6 +131,49 @@ const updateFeedback = async (id: string, payload: Partial<IFeedback>) => {
   return result;
 };
 
+const adminResponse = async (id: string, payload: Partial<IFeedback>) => {
+  const result = await Feedback.findByIdAndUpdate(
+    id,
+    { adminResponse: payload.adminResponse, status: FEEDBACK_STATUS.resolved },
+    { new: true },
+  ).populate('user');
+  if (!result) {
+    throw new AppError(httpStatus.BAD_REQUEST, 'Failed to update Feedback');
+  }
+  if (result.howCanWeContact === 'Email') {
+    // send email to user with admin response
+    const mailPath = path.join(
+      __dirname,
+      '../../../../public/view/feedback_replay.html',
+    );
+
+    await sendEmail(
+      result.email,
+      'Our Response to Your Feedback',
+      fs
+        .readFileSync(mailPath, 'utf8')
+        .replace('{{fullName}}', (result.user as IUser).name)
+        .replace('{{userFeedback}}', result.message)
+        .replace('{{adminResponse}}', result.adminResponse),
+    );
+  }
+  // 🔹 Redis cache invalidation
+  try {
+    // single feedback cache delete
+    await pubClient.del('feedback:' + id);
+
+    // feedback list cache clear
+    const keys = await pubClient.keys('feedback:*');
+    if (keys.length > 0) {
+      await pubClient.del(keys);
+    }
+  } catch (err) {
+    console.error('Redis cache invalidation error (updateFeedback):', err);
+  }
+
+  return result;
+};
+
 const deleteFeedback = async (id: string) => {
   const result = await Feedback.findByIdAndDelete(id);
   if (!result) {
@@ -155,4 +203,5 @@ export const feedbackService = {
   getFeedbackById,
   updateFeedback,
   deleteFeedback,
+  adminResponse,
 };

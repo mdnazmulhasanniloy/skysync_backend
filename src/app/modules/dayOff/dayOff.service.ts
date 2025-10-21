@@ -3,6 +3,7 @@ import { IDayOff } from './dayOff.interface';
 import DayOff from './dayOff.models';
 import AppError from '../../error/AppError';
 import { pubClient } from '../../redis';
+import QueryBuilder from '../../core/builder/QueryBuilder';
 
 const createDayOff = async (payload: IDayOff) => {
   const result = await DayOff.create(payload);
@@ -37,18 +38,43 @@ const getAllDayOff = async (query: Record<string, any>) => {
     if (cachedData) {
       return JSON.parse(cachedData);
     }
-    const response: {
-      data: any[];
-      meta: { page: number; limit: number; total: number };
-    } = await getAllDayOff(query);
+    const dayOffModel = new QueryBuilder(
+      DayOff.find({ isDeleted: false }),
+      query,
+    )
+      .search(['reason', 'status'])
+      .filter()
+      .paginate()
+      .sort()
+      .fields();
+
+    const data = await dayOffModel.modelQuery;
+    const meta = await dayOffModel.countTotal();
+    const response = {
+      data,
+      meta,
+    };
+
     await pubClient.set(cacheKey, JSON.stringify(response), { EX: 30 });
 
     return response;
   } catch (err) {
-    const response: {
-      data: any[];
-      meta: { page: number; limit: number; total: number };
-    } = await getAllDayOff(query);
+    const dayOffModel = new QueryBuilder(
+      DayOff.find({ isDeleted: false }),
+      query,
+    )
+      .search(['reason', 'status'])
+      .filter()
+      .paginate()
+      .sort()
+      .fields();
+
+    const data = await dayOffModel.modelQuery;
+    const meta = await dayOffModel.countTotal();
+    const response = {
+      data,
+      meta,
+    };
 
     return response;
   }
