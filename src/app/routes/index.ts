@@ -11,6 +11,7 @@ import { paymentsRoutes } from '../modules/payments/payments.route';
 import { referralRewardsRoutes } from '../modules/referralRewards/referralRewards.route';
 import { dayOffRoutes } from '../modules/dayOff/dayOff.route';
 import { flightRoutes } from '../modules/flight/flight.route';
+import { standbyRoutes } from '../modules/standby/standby.route';
 
 const router = Router();
 const moduleRoutes = [
@@ -61,6 +62,10 @@ const moduleRoutes = [
   {
     path: '/flights',
     route: flightRoutes,
+  },
+  {
+    path: '/standby',
+    route: standbyRoutes,
   },
 ];
 moduleRoutes.forEach(route => router.use(route.path, route.route));
