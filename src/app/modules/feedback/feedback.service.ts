@@ -43,7 +43,14 @@ const getAllFeedback = async (query: Record<string, any>) => {
     if (cachedData) {
       return JSON.parse(cachedData);
     }
-    const feedbackModel = new QueryBuilder(Feedback.find({}), query)
+    const feedbackModel = new QueryBuilder(
+      Feedback.find({}).populate({
+        path: 'user',
+        select:
+          '-verification -password -device -expireAt -isDeleted -passwordChangedAt -needsPasswordChange -loginWth -customerId',
+      }),
+      query,
+    )
       .search(['email', 'status'])
       .filter()
       .paginate()
@@ -61,7 +68,14 @@ const getAllFeedback = async (query: Record<string, any>) => {
     return response;
   } catch (err) {
     console.error('Redis caching error (getAllFeedback):', err);
-    const feedbackModel = new QueryBuilder(Feedback.find(), query)
+    const feedbackModel = new QueryBuilder(
+      Feedback.find().populate({
+        path: 'user',
+        select:
+          '-verification -password -device -expireAt -isDeleted -passwordChangedAt -needsPasswordChange -loginWth -customerId',
+      }),
+      query,
+    )
       .search(['email', 'status'])
       .filter()
       .paginate()
@@ -89,7 +103,11 @@ const getFeedbackById = async (id: string) => {
     }
 
     // 2. Fetch from DB
-    const result = await Feedback.findById(id);
+    const result = await Feedback.findById(id).populate({
+      path: 'user',
+      select:
+        '-verification -password -device -expireAt -isDeleted -passwordChangedAt -needsPasswordChange -loginWth -customerId',
+    });
     if (!result) {
       throw new AppError(httpStatus.BAD_REQUEST, 'Feedback not found!');
     }
@@ -100,7 +118,11 @@ const getFeedbackById = async (id: string) => {
     return result;
   } catch (err) {
     console.error('Redis caching error (geFeedbackById):', err);
-    const result = await Feedback.findById(id);
+    const result = await Feedback.findById(id).populate({
+      path: 'user',
+      select:
+        '-verification -password -device -expireAt -isDeleted -passwordChangedAt -needsPasswordChange -loginWth -customerId',
+    });
     if (!result) {
       throw new AppError(httpStatus.BAD_REQUEST, 'Feedback not found!');
     }

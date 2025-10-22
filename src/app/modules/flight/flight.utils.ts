@@ -199,12 +199,15 @@ export const getFlights = async (
             pipeline: [
               {
                 $project: {
-                  id: 1,
-                  _id: 1,
-                  name: 1,
-                  email: 1,
-                  phoneNumber: 1,
-                  profile: 1,
+                  verification: 0,
+                  password: 0,
+                  device: 0,
+                  expireAt: 0,
+                  isDeleted: 0,
+                  passwordChangedAt: 0,
+                  needsPasswordChange: 0,
+                  loginWth: 0,
+                  customerId: 0,
                 },
               },
             ],

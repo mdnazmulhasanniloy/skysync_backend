@@ -69,9 +69,11 @@ const getFlightById = async (id: string) => {
     }
 
     // 2. Fetch from DB
-    const result = await Flight.findById(id).populate([
-      { path: 'user', select: 'id _id email name phoneNumber profile' },
-    ]);
+    const result = await Flight.findById(id).populate({
+      path: 'user',
+      select:
+        '-verification -password -device -expireAt -isDeleted -passwordChangedAt -needsPasswordChange -loginWth -customerId',
+    });
     if (!result || result?.isDeleted) {
       throw new Error('Flight not found!');
     }
@@ -82,9 +84,11 @@ const getFlightById = async (id: string) => {
     return result;
   } catch (err) {
     console.error('Redis caching error (geFlightById):', err);
-    const result = await Flight.findById(id).populate([
-      { path: 'user', select: 'id _id email name phoneNumber profile' },
-    ]);
+    const result = await Flight.findById(id).populate({
+      path: 'user',
+      select:
+        '-verification -password -device -expireAt -isDeleted -passwordChangedAt -needsPasswordChange -loginWth -customerId',
+    });
     if (!result || result?.isDeleted) {
       throw new Error('Flight not found!');
     }

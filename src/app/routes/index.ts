@@ -12,6 +12,7 @@ import { referralRewardsRoutes } from '../modules/referralRewards/referralReward
 import { dayOffRoutes } from '../modules/dayOff/dayOff.route';
 import { flightRoutes } from '../modules/flight/flight.route';
 import { standbyRoutes } from '../modules/standby/standby.route';
+import { dndRoutes } from '../modules/dnd/dnd.route';
 
 const router = Router();
 const moduleRoutes = [
@@ -66,6 +67,10 @@ const moduleRoutes = [
   {
     path: '/standby',
     route: standbyRoutes,
+  },
+  {
+    path: '/dnd',
+    route: dndRoutes,
   },
 ];
 moduleRoutes.forEach(route => router.use(route.path, route.route));

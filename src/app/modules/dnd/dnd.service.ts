@@ -1,45 +1,45 @@
 import httpStatus from 'http-status';
-import { IStandby } from './standby.interface';
-import Standby from './standby.models';
+import { IDnd } from './dnd.interface';
+import Dnd from './dnd.models';
 import AppError from '../../error/AppError';
 import { pubClient } from '../../redis';
 import QueryBuilder from '../../core/builder/QueryBuilder';
 
-const createStandby = async (payload: IStandby) => {
-  const result = await Standby.create(payload);
+const createDnd = async (payload: IDnd) => {
+  const result = await Dnd.create(payload);
   if (!result) {
-    throw new AppError(httpStatus.BAD_REQUEST, 'Failed to create standby');
+    throw new AppError(httpStatus.BAD_REQUEST, 'Failed to create dnd');
   }
 
   // 🔹 Redis cache invalidation
   try {
-    // Clear all standby list caches
-    const keys = await pubClient.keys('standby:*');
+    // Clear all dnd list caches
+    const keys = await pubClient.keys('dnd:*');
     if (keys.length > 0) {
       await pubClient.del(keys);
     }
 
-    // Optionally, clear single standby cache if updating an existing unverified standby
+    // Optionally, clear single dnd cache if updating an existing unverified dnd
     if (result?._id) {
-      await pubClient.del('standby:' + result?._id?.toString());
+      await pubClient.del('dnd:' + result?._id?.toString());
     }
   } catch (err) {
-    console.error('Redis cache invalidation error (createStandby):', err);
+    console.error('Redis cache invalidation error (createDnd):', err);
   }
 
   return result;
 };
 
-const getAllStandby = async (query: Record<string, any>) => {
+const getAllDnd = async (query: Record<string, any>) => {
   try {
-    const cacheKey = 'standby:' + JSON.stringify(query);
+    const cacheKey = 'dnd:' + JSON.stringify(query);
     // 1. Check cache
     const cachedData = await pubClient.get(cacheKey);
     if (cachedData) {
       return JSON.parse(cachedData);
     }
-    const standbyModel = new QueryBuilder(
-      Standby.find({ isDeleted: false }).populate({
+    const dndModel = new QueryBuilder(
+      Dnd.find({ isDeleted: false }).populate({
         path: 'user',
         select:
           '-verification -password -device -expireAt -isDeleted -passwordChangedAt -needsPasswordChange -loginWth -customerId',
@@ -52,8 +52,8 @@ const getAllStandby = async (query: Record<string, any>) => {
       .sort()
       .fields();
 
-    const data = await standbyModel.modelQuery;
-    const meta = await standbyModel.countTotal();
+    const data = await dndModel.modelQuery;
+    const meta = await dndModel.countTotal();
 
     const response = { data, meta };
 
@@ -62,9 +62,9 @@ const getAllStandby = async (query: Record<string, any>) => {
 
     return response;
   } catch (err) {
-    console.error('Redis caching error (getAllStandby):', err);
-    const standbyModel = new QueryBuilder(
-      Standby.find({ isDeleted: false }).populate({
+    console.error('Redis caching error (getAllDnd):', err);
+    const dndModel = new QueryBuilder(
+      Dnd.find({ isDeleted: false }).populate({
         path: 'user',
         select:
           '-verification -password -device -expireAt -isDeleted -passwordChangedAt -needsPasswordChange -loginWth -customerId',
@@ -77,8 +77,8 @@ const getAllStandby = async (query: Record<string, any>) => {
       .sort()
       .fields();
 
-    const data = await standbyModel.modelQuery;
-    const meta = await standbyModel.countTotal();
+    const data = await dndModel.modelQuery;
+    const meta = await dndModel.countTotal();
 
     return {
       data,
@@ -87,9 +87,9 @@ const getAllStandby = async (query: Record<string, any>) => {
   }
 };
 
-const getStandbyById = async (id: string) => {
+const getDndById = async (id: string) => {
   try {
-    const cacheKey = 'standby:' + id;
+    const cacheKey = 'dnd:' + id;
 
     // 1. Check cache
     const cachedData = await pubClient.get(cacheKey);
@@ -98,13 +98,13 @@ const getStandbyById = async (id: string) => {
     }
 
     // 2. Fetch from DB
-    const result = await Standby.findById(id).populate({
+    const result = await Dnd.findById(id).populate({
       path: 'user',
       select:
         '-verification -password -device -expireAt -isDeleted -passwordChangedAt -needsPasswordChange -loginWth -customerId',
     });
     if (!result || result?.isDeleted) {
-      throw new Error('Standby not found!');
+      throw new Error('Dnd not found!');
     }
 
     // 3. Store in cache (e.g., 30s TTL)
@@ -112,73 +112,73 @@ const getStandbyById = async (id: string) => {
 
     return result;
   } catch (err) {
-    console.error('Redis caching error (geStandbyById):', err);
-    const result = await Standby.findById(id).populate({
+    console.error('Redis caching error (geDndById):', err);
+    const result = await Dnd.findById(id).populate({
       path: 'user',
       select:
         '-verification -password -device -expireAt -isDeleted -passwordChangedAt -needsPasswordChange -loginWth -customerId',
     });
     if (!result || result?.isDeleted) {
-      throw new Error('Standby not found!');
+      throw new Error('Dnd not found!');
     }
     return result;
   }
 };
 
-const updateStandby = async (id: string, payload: Partial<IStandby>) => {
-  const result = await Standby.findByIdAndUpdate(id, payload, { new: true });
+const updateDnd = async (id: string, payload: Partial<IDnd>) => {
+  const result = await Dnd.findByIdAndUpdate(id, payload, { new: true });
   if (!result) {
-    throw new Error('Failed to update Standby');
+    throw new Error('Failed to update Dnd');
   }
 
   // 🔹 Redis cache invalidation
   try {
-    // single standby cache delete
-    await pubClient.del('standby:' + id);
+    // single dnd cache delete
+    await pubClient.del('dnd:' + id);
 
-    // standby list cache clear
-    const keys = await pubClient.keys('standby:*');
+    // dnd list cache clear
+    const keys = await pubClient.keys('dnd:*');
     if (keys.length > 0) {
       await pubClient.del(keys);
     }
   } catch (err) {
-    console.error('Redis cache invalidation error (updateStandby):', err);
+    console.error('Redis cache invalidation error (updateDnd):', err);
   }
 
   return result;
 };
 
-const deleteStandby = async (id: string) => {
-  const result = await Standby.findByIdAndUpdate(
+const deleteDnd = async (id: string) => {
+  const result = await Dnd.findByIdAndUpdate(
     id,
     { isDeleted: true },
     { new: true },
   );
   if (!result) {
-    throw new AppError(httpStatus.BAD_REQUEST, 'Failed to delete standby');
+    throw new AppError(httpStatus.BAD_REQUEST, 'Failed to delete dnd');
   }
 
   // 🔹 Redis cache invalidation
   try {
-    // single standby cache delete
-    await pubClient.del('standby' + id?.toString());
+    // single dnd cache delete
+    await pubClient.del('dnd' + id?.toString());
 
-    // standby list cache clear
-    const keys = await pubClient.keys('standby:*');
+    // dnd list cache clear
+    const keys = await pubClient.keys('dnd:*');
     if (keys.length > 0) {
       await pubClient.del(keys);
     }
   } catch (err) {
-    console.error('Redis cache invalidation error (deleteStandby):', err);
+    console.error('Redis cache invalidation error (deleteDnd):', err);
   }
 
   return result;
 };
 
-export const standbyService = {
-  createStandby,
-  getAllStandby,
-  getStandbyById,
-  updateStandby,
-  deleteStandby,
+export const dndService = {
+  createDnd,
+  getAllDnd,
+  getDndById,
+  updateDnd,
+  deleteDnd,
 };

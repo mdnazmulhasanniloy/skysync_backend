@@ -26,8 +26,7 @@ export interface IUser {
   customerId: string;
   profile: string;
   loginWth: 'google' | 'apple' | 'facebook' | 'credentials';
-  role: string;
-  isGoogleLogin: boolean;
+  role: string; 
   address?: string;
   needsPasswordChange: boolean;
   passwordChangedAt?: Date;

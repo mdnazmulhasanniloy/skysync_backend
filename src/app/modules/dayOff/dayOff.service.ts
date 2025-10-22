@@ -39,7 +39,11 @@ const getAllDayOff = async (query: Record<string, any>) => {
       return JSON.parse(cachedData);
     }
     const dayOffModel = new QueryBuilder(
-      DayOff.find({ isDeleted: false }),
+      DayOff.find({ isDeleted: false }).populate({
+        path: 'user',
+        select:
+          '-verification -password -device -expireAt -isDeleted -passwordChangedAt -needsPasswordChange -loginWth -customerId',
+      }),
       query,
     )
       .search(['reason', 'status'])
@@ -60,7 +64,11 @@ const getAllDayOff = async (query: Record<string, any>) => {
     return response;
   } catch (err) {
     const dayOffModel = new QueryBuilder(
-      DayOff.find({ isDeleted: false }),
+      DayOff.find({ isDeleted: false }).populate({
+        path: 'user',
+        select:
+          '-verification -password -device -expireAt -isDeleted -passwordChangedAt -needsPasswordChange -loginWth -customerId',
+      }),
       query,
     )
       .search(['reason', 'status'])
@@ -91,9 +99,11 @@ const getDayOffById = async (id: string) => {
     }
 
     // 2. Fetch from DB
-    const result = await DayOff.findById(id).populate([
-      { path: 'user', select: 'id _id email name phoneNumber profile' },
-    ]);
+    const result = await DayOff.findById(id).populate({
+      path: 'user',
+      select:
+        '-verification -password -device -expireAt -isDeleted -passwordChangedAt -needsPasswordChange -loginWth -customerId',
+    });
     if (!result || result?.isDeleted) {
       throw new Error('DayOff not found!');
     }
@@ -104,9 +114,11 @@ const getDayOffById = async (id: string) => {
     return result;
   } catch (err) {
     console.error('Redis caching error (geDayOffById):', err);
-    const result = await DayOff.findById(id).populate([
-      { path: 'user', select: 'id _id email name phoneNumber profile' },
-    ]);
+    const result = await DayOff.findById(id).populate({
+      path: 'user',
+      select:
+        '-verification -password -device -expireAt -isDeleted -passwordChangedAt -needsPasswordChange -loginWth -customerId',
+    });
     if (!result || result?.isDeleted) {
       throw new Error('DayOff not found!');
     }
