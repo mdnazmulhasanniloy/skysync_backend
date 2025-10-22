@@ -13,6 +13,7 @@ import { dayOffRoutes } from '../modules/dayOff/dayOff.route';
 import { flightRoutes } from '../modules/flight/flight.route';
 import { standbyRoutes } from '../modules/standby/standby.route';
 import { dndRoutes } from '../modules/dnd/dnd.route';
+import { giftCardRoutes } from '../modules/giftCard/giftCard.route';
 
 const router = Router();
 const moduleRoutes = [
@@ -71,6 +72,10 @@ const moduleRoutes = [
   {
     path: '/dnd',
     route: dndRoutes,
+  },
+  {
+    path: '/gift-cards',
+    route: giftCardRoutes,
   },
 ];
 moduleRoutes.forEach(route => router.use(route.path, route.route));
