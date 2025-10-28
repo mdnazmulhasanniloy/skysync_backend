@@ -8,6 +8,7 @@ import QueryBuilder from '../../core/builder/QueryBuilder';
 import bcrypt from 'bcrypt';
 import config from '../../config';
 import ReferralRewards from '../referralRewards/referralRewards.models';
+import { Login_With } from './user.constants';
 
 export type IFilter = {
   searchTerm?: string;
@@ -38,7 +39,7 @@ const createUser = async (payload: IUser): Promise<IUser> => {
     );
   }
 
-  if (payload?.isGoogleLogin) {
+  if (payload?.loginWth === Login_With.google) {
     payload.verification = {
       otp: 0,
       expiresAt: new Date(Date.now()),
@@ -46,7 +47,7 @@ const createUser = async (payload: IUser): Promise<IUser> => {
     };
   }
 
-  if (!payload.isGoogleLogin && !payload.password) {
+  if (payload?.loginWth !== Login_With.google && !payload.password) {
     throw new AppError(httpStatus.BAD_REQUEST, 'Password is required');
   }
 

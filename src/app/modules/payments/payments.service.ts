@@ -217,24 +217,59 @@ const confirmPayments = async (query: Record<string, any>, res: Response) => {
     const isHaveReferralRewords = await ReferralRewards.findOne({
       referredUser: subscription?.user,
       status: REFERRAL_REWARDS.pending,
-    }).session(session);
-
+    })
+      .populate('referrer')
+      .session(session);
     if (isHaveReferralRewords) {
-      await ReferralRewards.findByIdAndUpdate(
-        isHaveReferralRewords._id,
-        {
-          status: REFERRAL_REWARDS.completed,
-          subscription: subscription?._id,
-        },
-        { session },
+      const createdAt = (isHaveReferralRewords?.referrer as IUser)?.createdAt;
+      const probationStart = moment(createdAt);
+      const probationEnd = moment(createdAt).add(3, 'months');
+      const now = moment();
+
+      // Check if current date is within probation period
+      const isInProbation = now.isBetween(
+        probationStart,
+        probationEnd,
+        'day',
+        '[]',
       );
 
-      await User.findByIdAndUpdate(
-        isHaveReferralRewords.referrer,
-        { $inc: { balance: 5 } },
-        { session },
-      );
+      if (
+        isInProbation &&
+        (isHaveReferralRewords?.referrer as IUser)?.referralCount < 10
+      ) {
+        await ReferralRewards.findByIdAndUpdate(
+          isHaveReferralRewords._id,
+          {
+            status: REFERRAL_REWARDS.completed,
+            subscription: subscription?._id,
+          },
+          { session },
+        );
+
+        await User.findByIdAndUpdate(
+          (isHaveReferralRewords?.referrer as IUser)?._id,
+          { $inc: { balance: 5, referralCount: 1 } },
+          { session },
+        );
+      } else if (!isInProbation) {
+        await ReferralRewards.findByIdAndUpdate(
+          isHaveReferralRewords._id,
+          {
+            status: REFERRAL_REWARDS.completed,
+            subscription: subscription?._id,
+          },
+          { session },
+        );
+
+        await User.findByIdAndUpdate(
+          (isHaveReferralRewords?.referrer as IUser)?._id,
+          { $inc: { points: 5 } },
+          { session },
+        );
+      }
     }
+
     await session.commitTransaction();
     return {
       ...updatedPayments?.toObject(),

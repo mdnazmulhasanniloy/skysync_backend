@@ -90,6 +90,7 @@ const userSchema = new Schema<IUser>(
     },
 
     points: { type: Number, default: 0 },
+    referralCount: { type: Number, default: 0 },
 
     // Auth info
     loginWth: {

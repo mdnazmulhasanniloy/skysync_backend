@@ -19,6 +19,7 @@ export interface IUser {
   referralCode: string;
   fleet: number[];
   agreements: string;
+  referralCount: number;
   points: number;
   balance: number;
 
@@ -26,7 +27,7 @@ export interface IUser {
   customerId: string;
   profile: string;
   loginWth: 'google' | 'apple' | 'facebook' | 'credentials';
-  role: string; 
+  role: string;
   address?: string;
   needsPasswordChange: boolean;
   passwordChangedAt?: Date;
@@ -45,6 +46,7 @@ export interface IUser {
     device: string;
     lastLogin: string;
   };
+  createdAt: Date;
 }
 
 export interface UserModel extends Model<IUser> {
