@@ -17,6 +17,7 @@ import { giftCardRoutes } from '../modules/giftCard/giftCard.route';
 import { dashboardRoutes } from '../modules/dashboard/dashboard.route';
 import { homeRoutes } from '../modules/home/home.route';
 import { bookmarkRoutes } from '../modules/bookmark/bookmark.route';
+import { withdrawRoutes } from '../modules/withdraw/withdraw.route';
 
 const router = Router();
 const moduleRoutes = [
@@ -91,6 +92,10 @@ const moduleRoutes = [
   {
     path: '/bookmark',
     route: bookmarkRoutes,
+  },
+  {
+    path: '/withdraw',
+    route: withdrawRoutes,
   },
 ];
 moduleRoutes.forEach(route => router.use(route.path, route.route));
