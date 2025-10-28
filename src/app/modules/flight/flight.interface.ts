@@ -20,7 +20,6 @@ export interface IFlight {
     fleet2: number;
   };
   remarks: string;
-
   isDeleted: boolean;
 }
 

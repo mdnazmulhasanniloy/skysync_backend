@@ -1,6 +1,7 @@
 import cron from 'node-cron';
 import { pubClient } from '../redis';
 import Message from '../modules/messages/messages.models';
+import ReferralRewards from '../modules/referralRewards/referralRewards.models';
 
 cron.schedule('*/10 * * * * *', async () => {
   const keys = await pubClient.keys('chat:*:messages');
@@ -19,3 +20,18 @@ cron.schedule('*/10 * * * * *', async () => {
 
   console.log('✅ Redis messages saved to DB');
 });
+
+// cron.schedule('0 0 * * *', async () => {
+//   try {
+//     // Daily cron job logic here
+//     const rewords = await ReferralRewards.find({
+//       isWithdrawn: false,
+//       convertedToCoin: false,
+//       createdAt:{
+
+//       }
+//     })
+//   } catch (err) {
+//     console.error('Error in daily cron job:', err);
+//   }
+// });

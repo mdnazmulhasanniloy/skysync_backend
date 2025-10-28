@@ -9,7 +9,7 @@ const dayOffSchema = new Schema<IDayOff>(
       required: true,
     },
     schedulePeriod: {
-      type: String,
+      type: Date,
       required: true,
     },
     remarks: {

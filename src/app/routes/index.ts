@@ -14,6 +14,9 @@ import { flightRoutes } from '../modules/flight/flight.route';
 import { standbyRoutes } from '../modules/standby/standby.route';
 import { dndRoutes } from '../modules/dnd/dnd.route';
 import { giftCardRoutes } from '../modules/giftCard/giftCard.route';
+import { dashboardRoutes } from '../modules/dashboard/dashboard.route';
+import { homeRoutes } from '../modules/home/home.route';
+import { bookmarkRoutes } from '../modules/bookmark/bookmark.route';
 
 const router = Router();
 const moduleRoutes = [
@@ -76,6 +79,18 @@ const moduleRoutes = [
   {
     path: '/gift-cards',
     route: giftCardRoutes,
+  },
+  {
+    path: '/dashboard',
+    route: dashboardRoutes,
+  },
+  {
+    path: '/home-page',
+    route: homeRoutes,
+  },
+  {
+    path: '/bookmark',
+    route: bookmarkRoutes,
   },
 ];
 moduleRoutes.forEach(route => router.use(route.path, route.route));

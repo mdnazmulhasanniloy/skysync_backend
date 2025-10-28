@@ -89,7 +89,6 @@ const userSchema = new Schema<IUser>(
       unique: true,
     },
 
-    balance: { type: Number, default: 0 },
     points: { type: Number, default: 0 },
 
     // Auth info
@@ -141,6 +140,11 @@ const userSchema = new Schema<IUser>(
       os: String,
       device: String,
       lastLogin: String,
+    },
+
+    businessClassTrained: {
+      type: Boolean,
+      default: false,
     },
 
     isDeleted: {

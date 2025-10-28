@@ -16,10 +16,10 @@ const sendMessage = async (
   user: any,
   callback: (args: any) => void,
 ) => {
-  try {
+  try { 
     if (!payload?.chat) {
       const chat = await Chat.create({
-        participants: [payload?.receiver, payload?.sender],
+        participants: [payload?.receiver, user?.userId],
         status: 'accepted',
       });
       payload.chat = chat._id?.toString();

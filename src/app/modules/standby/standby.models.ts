@@ -9,7 +9,7 @@ const standbySchema = new Schema<IStandby>(
       required: true,
     },
     date: {
-      type: String,
+      type: Date,
       required: true,
     },
     startTime: {

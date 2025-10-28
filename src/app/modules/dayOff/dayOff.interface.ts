@@ -2,7 +2,7 @@ import { Model, ObjectId } from 'mongoose';
 
 export interface IDayOff {
   user: ObjectId;
-  schedulePeriod: string;
+  schedulePeriod: Date;
   remarks: string;
   isDeleted: boolean;
 }

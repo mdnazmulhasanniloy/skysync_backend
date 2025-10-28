@@ -30,6 +30,7 @@ export interface IUser {
   address?: string;
   needsPasswordChange: boolean;
   passwordChangedAt?: Date;
+  businessClassTrained: boolean;
   isDeleted: boolean;
   expireAt: Date;
   verification: {

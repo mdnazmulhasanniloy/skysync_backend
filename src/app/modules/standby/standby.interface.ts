@@ -3,7 +3,7 @@ import { IUser } from '../user/user.interface';
 
 export interface IStandby {
   user: ObjectId | IUser;
-  date: string;
+  date: Date;
   startTime: string;
   endTime: string;
   remarks: string;

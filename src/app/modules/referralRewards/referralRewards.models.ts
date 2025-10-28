@@ -16,6 +16,14 @@ const referralRewardsSchema = new Schema<IReferralRewards>(
       ref: 'User',
       required: true,
     },
+    isWithdrawn: {
+      type: Boolean,
+      default: false,
+    },
+    convertedToCoin: {
+      type: Boolean,
+      default: false,
+    },
     subscription: {
       type: Types.ObjectId,
       ref: 'Subscriptions',

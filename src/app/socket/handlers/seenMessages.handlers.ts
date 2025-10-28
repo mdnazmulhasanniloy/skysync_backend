@@ -38,11 +38,13 @@ const SeenMessageHandlers = async (
       },
       { seen: true },
     );
-    const user1 = chat.participants[0];
-    const user2 = chat.participants[1];
-    getChatList(io, { _id: user1 }, callback);
-    getChatList(io, { _id: user2 }, callback);
+    const user1 = chat.participants[0]?.toString();
+    const user2 = chat.participants[1]?.toString();
+    getChatList(io, { userId: user1 }, callback);
+    getChatList(io, { userId: user2 }, callback);
   } catch (error: any) {
+    console.log('🚀 ~ SeenMessageHandlers ~ error:', error);
+
     return callbackFn(callback, {
       success: false,
       message: error?.message || 'seen message failed',
