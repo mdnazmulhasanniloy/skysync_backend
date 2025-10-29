@@ -18,6 +18,7 @@ import { dashboardRoutes } from '../modules/dashboard/dashboard.route';
 import { homeRoutes } from '../modules/home/home.route';
 import { bookmarkRoutes } from '../modules/bookmark/bookmark.route';
 import { withdrawRoutes } from '../modules/withdraw/withdraw.route';
+import { redemRoutes } from '../modules/redem/redem.route';
 
 const router = Router();
 const moduleRoutes = [
@@ -96,6 +97,10 @@ const moduleRoutes = [
   {
     path: '/withdraw',
     route: withdrawRoutes,
+  },
+  {
+    path: '/redem',
+    route: redemRoutes,
   },
 ];
 moduleRoutes.forEach(route => router.use(route.path, route.route));
