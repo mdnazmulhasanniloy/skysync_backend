@@ -24,7 +24,12 @@ const paymentsSchema = new Schema<IPayments>(
       type: String,
       default: null,
     },
+    paymentIntentId: { type: String, default: null },
     paymentAt: {
+      type: String,
+      default: null,
+    },
+    cardLast4: {
       type: String,
       default: null,
     },

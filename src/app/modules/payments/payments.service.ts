@@ -14,6 +14,8 @@ import moment from 'moment';
 import ReferralRewards from '../referralRewards/referralRewards.models';
 import { REFERRAL_REWARDS } from '../referralRewards/referralRewards.constants';
 import { startSession } from 'mongoose';
+import pickQuery from '../../utils/pickQuery';
+import { paginationHelper } from '../../helpers/pagination.helpers';
 
 const checkout = async (payload: IPayments) => {
   let paymentData;
@@ -151,6 +153,7 @@ const confirmPayments = async (query: Record<string, any>, res: Response) => {
       paymentDate,
       receipt_url: charge.receipt_url,
     };
+    console.log('🚀 ~ confirmPayments ~ chargeDetails:', chargeDetails);
 
     const oldSubscription = await Subscription.findOne({
       user: payment?.user,
@@ -198,7 +201,9 @@ const confirmPayments = async (query: Record<string, any>, res: Response) => {
       {
         isPaid: true,
         trnId: chargeDetails.transactionId ?? null,
-        receipt_url: chargeDetails.receipt_url ?? null,
+        cardLast4: chargeDetails.cardLast4 ?? null,
+        receipt_url: chargeDetails?.receipt_url ?? charge.receipt_url ?? null,
+        paymentIntentId,
         paymentAt: moment.unix(charge.created).toDate(),
       },
       { new: true, session },
@@ -298,136 +303,119 @@ const confirmPayments = async (query: Record<string, any>, res: Response) => {
   }
 };
 
-// const confirmPayments = async (query: Record<string, any>, res: Response) => {
-//   const { sessionId, paymentId } = query;
-//   const PaymentSession = await StripeService.getPaymentSession(sessionId);
-//   const paymentIntentId = PaymentSession.payment_intent as string;
+const allTransitions = async (query: Record<string, any>) => {
+  const { filters, pagination } = await pickQuery(query);
+  const { searchTerm } = filters;
 
-//   const session = await startSession();
-//   session.startTransaction();
+  const pipeline: any[] = [{ $match: { isDeleted: false, isPaid: true } }];
 
-//   const paymentIntent =
-//     await StripeService.getStripe().paymentIntents.retrieve(paymentIntentId);
+  if (searchTerm) {
+    pipeline.push({
+      $match: {
+        $or: [{ trnId: { $regex: searchTerm, $options: 'i' } }],
+      },
+    });
+  }
 
-//   // 🔹 2. Ensure payment success
-//   const isPaymentSuccess = await StripeService.isPaymentSuccess(sessionId);
-//   if (!isPaymentSuccess) {
-//     throw res.render('paymentError', {
-//       message: 'Payment session is not completed',
-//     });
-//   }
+  const { page, limit, skip, sort } =
+    paginationHelper.calculatePagination(pagination);
 
-//   const payment = await Payments.findById(paymentId);
-//   if (!payment) {
-//     throw res.render('paymentError', {
-//       message: 'Payment not found',
-//     });
-//     throw new AppError(httpStatus.NOT_FOUND, 'Payment not found');
-//   }
+  if (sort) {
+    const sortArray = sort.split(',').map(field => {
+      const trimmed = field.trim();
+      return trimmed.startsWith('-')
+        ? { [trimmed.slice(1)]: -1 }
+        : { [trimmed]: 1 };
+    });
+    pipeline.push({ $sort: Object.assign({}, ...sortArray) });
+  }
 
-//   if (payment.isPaid) {
-//     throw res.render('paymentError', {
-//       message: 'This payment is already confirmed.',
-//     });
-//   }
+  pipeline.push({
+    $facet: {
+      totalData: [{ $count: 'total' }],
+      paginatedData: [
+        { $skip: skip },
+        { $limit: limit },
+        {
+          $lookup: {
+            from: 'users',
+            localField: 'user',
+            foreignField: '_id',
+            as: 'user',
+            pipeline: [
+              {
+                $project: {
+                  _id: 1,
+                  name: 1,
+                  email: 1,
+                  phoneNumber: 1,
+                  profile: 1,
+                },
+              },
+            ],
+          },
+        },
+        { $addFields: { user: { $arrayElemAt: ['$user', 0] } } },
+      ],
+    },
+  });
 
-//   const charge = await StripeService.getStripe().charges.retrieve(
-//     paymentIntent.latest_charge as string,
-//   );
+  const cartData = await Payments.aggregate([
+    {
+      $facet: {
+        todayIncome: [
+          {
+            $match: {
+              isDeleted: false,
+              isPaid: true,
+              createdAt: {
+                $gte: moment().utc().startOf('day').toDate(),
+                $lte: moment().utc().endOf('day').toDate(),
+              },
+            },
+          },
+          {
+            $group: { _id: null, totalAmount: { $sum: '$amount' } },
+          },
+          { $project: { _id: 0, totalAmount: 1 } },
+        ],
+        totalIncome: [
+          {
+            $match: { isDeleted: false, isPaid: true },
+          },
+          {
+            $group: { _id: null, totalAmount: { $sum: '$amount' } },
+          },
+          { $project: { _id: 0, totalAmount: 1 } },
+        ],
+      },
+    },
+  ]);
 
-//   if (charge?.refunded) {
-//     throw new AppError(httpStatus.BAD_REQUEST, 'Payment has been refunded');
-//   }
+  const [transitionData] = await Payments.aggregate(pipeline);
 
-//   const paymentDate = moment.unix(charge.created).format('YYYY-MM-DD HH:mm');
+  const todayEarning = cartData[0]?.todayIncome?.[0]?.totalAmount || 0;
+  const totalEarnings = cartData[0]?.totalIncome?.[0]?.totalAmount || 0;
 
-//   const chargeDetails = {
-//     amount: charge.amount,
-//     currency: charge.currency,
-//     status: charge.status,
-//     paymentMethod: charge.payment_method,
-//     paymentMethodDetails: charge.payment_method_details?.card,
-//     transactionId: charge.balance_transaction,
-//     cardLast4: charge.payment_method_details?.card?.last4,
-//     paymentDate,
-//     receipt_url: charge.receipt_url,
-//   };
+  const total = transitionData?.totalData?.totalData || 0;
+  const data = transitionData?.paginatedData || [];
 
-//   const oldSubscription = await Subscription.findOne({
-//     user: payment?.user,
-//     isPaid: true,
-//     isExpired: false,
-//     isDeleted: false,
-//   });
-
-//   let expiredAt = moment();
-
-//   if (
-//     oldSubscription?.expiredAt &&
-//     moment(oldSubscription.expiredAt).isAfter(moment())
-//   ) {
-//     expiredAt = moment(oldSubscription.expiredAt);
-//   }
-
-//   if (oldSubscription) {
-//     await Subscription?.findByIdAndUpdate(oldSubscription?._id, {
-//       isExpired: true,
-//     });
-//   }
-
-//   const subscription = await Subscription.findById(
-//     payment?.subscription,
-//   ).populate([
-//     { path: 'package' },
-//     {
-//       path: 'user',
-//       select: '_id email name phoneNumber isCompleteFirstSubscribe',
-//     },
-//   ]);
-
-//   if ((subscription?.package as IPackage)?.days) {
-//     expiredAt = expiredAt.add(
-//       (subscription?.package as IPackage)?.days,
-//       'days',
-//     );
-//   }
-
-//   const updatedPayments = await Payments.findByIdAndUpdate(paymentId, {
-//     isPaid: true,
-//     trnId: (chargeDetails.transactionId as string) ?? null,
-//     receipt_url: chargeDetails.receipt_url ?? null,
-//     paymentAt: moment.unix(charge.created)?.toDate(),
-//   });
-
-//   await Subscription?.findByIdAndUpdate(subscription?._id, {
-//     isPaid: true,
-//     expiredAt: expiredAt?.toDate(),
-//   });
-
-//   const isHaveReferralRewords = await ReferralRewards.findOne({
-//     referredUser: subscription?.user,
-//     status: REFERRAL_REWARDS.pending,
-//   });
-
-//   if (isHaveReferralRewords) {
-//     await ReferralRewards.findByIdAndUpdate(isHaveReferralRewords?._id, {
-//       status: REFERRAL_REWARDS.completed,
-//       subscription: subscription?._id,
-//     });
-
-//     await User.findByIdAndUpdate(isHaveReferralRewords.referrer, {
-//       $inc: { balance: 5 },
-//     });
-//   }
-
-//   return {
-//     ...updatedPayments,
-//     chargeDetails,
-//     package: subscription.package,
-//   };
-// };
+  return {
+    todayEarning,
+    totalEarnings,
+    allTransitions: {
+      meta: {
+        page,
+        limit,
+        total,
+      },
+      data,
+    },
+  };
+};
 
 export const paymentsService = {
   checkout,
   confirmPayments,
+  allTransitions,
 };

@@ -10,6 +10,8 @@ export interface IPayments {
   trnId: string;
   paymentAt: string;
   receiptUrl: string;
+  cardLast4: string;
+  paymentIntentId: string;
   isPaid: boolean;
   isDeleted: boolean;
 }
