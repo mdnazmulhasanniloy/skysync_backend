@@ -195,18 +195,21 @@ const confirmPayments = async (query: Record<string, any>, res: Response) => {
         'days',
       );
     }
-
+    const paymentData = {
+      isPaid: true,
+      trnId: chargeDetails.transactionId ?? null,
+      cardLast4: chargeDetails.cardLast4 ?? null,
+      receipt_url: chargeDetails?.receipt_url || charge.receipt_url,
+      paymentIntentId,
+      paymentAt: moment.unix(charge.created).toDate(),
+    };
     const updatedPayments = await Payments.findByIdAndUpdate(
       paymentId,
+      paymentData,
       {
-        isPaid: true,
-        trnId: chargeDetails.transactionId ?? null,
-        cardLast4: chargeDetails.cardLast4 ?? null,
-        receipt_url: chargeDetails?.receipt_url ?? charge.receipt_url ?? null,
-        paymentIntentId,
-        paymentAt: moment.unix(charge.created).toDate(),
+        new: true,
+        session,
       },
-      { new: true, session },
     );
 
     await Subscription.findByIdAndUpdate(

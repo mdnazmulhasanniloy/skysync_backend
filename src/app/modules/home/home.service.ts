@@ -439,6 +439,7 @@ const standByFilter = async (query: Record<string, any>) => {
                   _id: 1,
                   name: 1,
                   email: 1,
+                  bio: 1,
                   phoneNumber: 1,
                   profile: 1,
                 },
