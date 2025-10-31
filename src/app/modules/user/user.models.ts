@@ -89,6 +89,7 @@ const userSchema = new Schema<IUser>(
       unique: true,
     },
 
+    balance: { type: Number, default: 0 },
     points: { type: Number, default: 0 },
     referralCount: { type: Number, default: 0 },
 

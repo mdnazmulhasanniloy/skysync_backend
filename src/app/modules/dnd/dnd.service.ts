@@ -4,8 +4,10 @@ import Dnd from './dnd.models';
 import AppError from '../../error/AppError';
 import { pubClient } from '../../redis';
 import QueryBuilder from '../../core/builder/QueryBuilder';
+import moment from 'moment';
 
 const createDnd = async (payload: IDnd) => {
+  payload.date = moment(payload.date).utc().toDate();
   const result = await Dnd.create(payload);
   if (!result) {
     throw new AppError(httpStatus.BAD_REQUEST, 'Failed to create dnd');

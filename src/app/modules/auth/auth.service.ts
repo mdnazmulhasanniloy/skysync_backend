@@ -446,7 +446,7 @@ const resetPasswordLink = async (token: string) => {
     );
   }
 
-  return;
+  return user;
 };
 
 export const authServices = {

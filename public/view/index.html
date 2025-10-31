@@ -1,0 +1,139 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Minew B10 BLE Scanner</title>
+    <style>
+      body {
+        font-family: sans-serif;
+        padding: 20px;
+        background: #f9f9fb;
+      }
+      button {
+        padding: 12px 20px;
+        font-size: 16px;
+        margin: 5px;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+      }
+      #scan {
+        background: #4caf50;
+        color: #fff;
+      }
+      #stop {
+        background: #f44336;
+        color: #fff;
+      }
+      #log {
+        margin-top: 20px;
+        background: #fff;
+        padding: 15px;
+        border-radius: 8px;
+        max-height: 60vh;
+        overflow-y: auto;
+        font-family: monospace;
+      }
+      .beacon {
+        color: #2196f3;
+      }
+      .err {
+        color: red;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Minew B10 Beacon Scanner</h1>
+    <p>Scans for your B10 (FCC: 2ABU6-10). QR hint: C3:00:00:51:33:34</p>
+    <button id="scan">Start Scan</button>
+    <button id="stop" disabled>Stop</button>
+    <div id="log"></div>
+
+    <script>
+      const log = document.getElementById('log');
+      const scanBtn = document.getElementById('scan');
+      const stopBtn = document.getElementById('stop');
+
+      function add(msg, cls = '') {
+        const d = document.createElement('div');
+        d.textContent = msg;
+        if (cls) d.className = cls;
+        log.appendChild(d);
+        log.scrollTop = log.scrollHeight;
+      }
+
+      scanBtn.onclick = async () => {
+        if (!navigator.bluetooth) {
+          add('Web Bluetooth not supported (use Chrome on Android)', 'err');
+          return;
+        }
+
+        scanBtn.disabled = true;
+        stopBtn.disabled = false;
+        add(
+          'Scanning for B10 beacons... (press back button on device to advertise)',
+        );
+
+        try {
+          const device = await navigator.bluetooth.requestDevice({
+            acceptAllDevices: true,
+            optionalServices: [
+              '0000180f-0000-1000-8000-00805f9b34fb',
+              'battery_service',
+            ], // Device Info + Battery
+          });
+
+          add(
+            `Found:(ID: ${device.id}),  ${device.name || 'Unnamed B10'} `,
+            'beacon',
+          );
+
+          device.addEventListener('gattserverdisconnected', () => {
+            window.alert('disconnect');
+            add('Disconnected.');
+          });
+
+          const server = await device.gatt.connect();
+          add('Connected! Reading beacon data...');
+
+          // Read MAC-ish from QR hint or services
+          const services = await server.getPrimaryServices();
+          for (const s of services) {
+            add(`Service: ${s.uuid}`);
+            if (s.uuid.includes('180f')) {
+              // Device Info
+              const chars = await s.getCharacteristics();
+              for (const c of chars) {
+                if (c.properties.read) {
+                  const v = await c.readValue();
+                  add(
+                    `  MAC/Info: ${Array.from(new Uint8Array(v.buffer))
+                      .map(b => b.toString(16).padStart(2, '0'))
+                      .join(':')}`,
+                  );
+                }
+              }
+            }
+          }
+
+          // Simulate QR decode
+          add(
+            'QR Decode: Frame=C3, UUID=00:00:51:33:34 (use in app for config)',
+          );
+        } catch (e) {
+          add(`Error: ${e.message}`, 'err');
+        } finally {
+          scanBtn.disabled = false;
+          stopBtn.disabled = true;
+        }
+      };
+
+      stopBtn.onclick = () => {
+        scanBtn.disabled = false;
+        stopBtn.disabled = true;
+        add('Stopped.');
+      };
+    </script>
+  </body>
+</html>

@@ -27,8 +27,13 @@ const createBookmark = async (payload: IBookmark) => {
 const getAllBookmark = async (query: Record<string, any>) => {
   const bookmarkModel = new QueryBuilder(
     Bookmark.find({}).populate([
-      { path: 'reference' },
-      { path: 'user', select: '_id name email phoneNumber profile' },
+      {
+        path: 'reference',
+        populate: [
+          { path: 'user', select: '_id name email phoneNumber profile bio' },
+        ],
+      },
+      { path: 'user', select: '_id name email phoneNumber profile bio' },
     ]),
     query,
   )
@@ -49,8 +54,13 @@ const getAllBookmark = async (query: Record<string, any>) => {
 
 const getBookmarkById = async (id: string) => {
   const result = await Bookmark.findById(id).populate([
-    { path: 'reference' },
-    { path: 'user', select: '_id name email phoneNumber profile' },
+    {
+      path: 'reference',
+      populate: [
+        { path: 'user', select: '_id name email phoneNumber profile bio' },
+      ],
+    },
+    { path: 'user', select: '_id name email phoneNumber profile bio' },
   ]);
   if (!result) {
     throw new Error('Bookmark not found!');

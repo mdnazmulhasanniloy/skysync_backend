@@ -61,7 +61,18 @@ const createRedem = async (payload: IRedem) => {
 };
 
 const getAllRedem = async (query: Record<string, any>) => {
-  const redemModel = new QueryBuilder(Redem.find({ isDeleted: false }), query)
+  const redemModel = new QueryBuilder(
+    Redem.find({ isDeleted: false }).populate([
+      {
+        path: 'user',
+        select: '_id name email phoneNumber balance point profile',
+      },
+      {
+        path: 'giftCard',
+      },
+    ]),
+    query,
+  )
     .search([''])
     .filter()
     .paginate()
@@ -78,7 +89,15 @@ const getAllRedem = async (query: Record<string, any>) => {
 };
 
 const getRedemById = async (id: string) => {
-  const result = await Redem.findById(id);
+  const result = await Redem.findById(id).populate([
+    {
+      path: 'user',
+      select: '_id name email phoneNumber balance point profile',
+    },
+    {
+      path: 'giftCard',
+    },
+  ]);
   if (!result || result?.isDeleted) {
     throw new Error('Redem not found!');
   }

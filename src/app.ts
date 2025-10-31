@@ -8,11 +8,13 @@ import express, { Application, Request, Response } from 'express';
 import globalErrorHandler from './app/middleware/globalErrorhandler';
 import notFound from './app/middleware/notfound';
 import router from './app/routes';
+import path from 'path';
 const app: Application = express();
 app.use(express.static('public'));
 app.use(express.json({ limit: '500mb' }));
 app.use(express.urlencoded({ limit: '500mb', extended: true }));
-
+app.set('view engine', 'ejs');
+app.set('views', 'public/ejs');
 //parsers
 app.use(express.json());
 app.use(cookieParser());
@@ -29,6 +31,9 @@ app.use(
 
 // application routes
 app.use('/api/v1', router);
+app.get('/webhook', async (req, res) => {
+  console.log({ params: req.params, query: req.query, body: req.body });
+});
 app.get('/', (req: Request, res: Response) => {
   res.send('server is running');
 });

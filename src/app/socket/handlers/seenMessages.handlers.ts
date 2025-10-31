@@ -7,6 +7,7 @@ import Chat from '../../modules/chat/chat.models';
 import { IChat } from '../../modules/chat/chat.interface';
 import getChatList from './chatList.handlers';
 import { deflate } from 'zlib';
+import { pubClient } from '../../redis';
 
 const SeenMessageHandlers = async (
   io: any,
@@ -30,7 +31,7 @@ const SeenMessageHandlers = async (
       });
     }
 
-    Message.updateMany(
+    await Message.updateMany(
       {
         chat: new Types.ObjectId(chatId),
         receiver: new Types.ObjectId(user?.userId),
@@ -38,12 +39,24 @@ const SeenMessageHandlers = async (
       },
       { seen: true },
     );
+    try {
+      // single dnd cache delete
+      await pubClient.del('chat_list:' + user?.userId?.toString());
+
+      // dnd list cache clear
+      const keys = await pubClient.keys('chat_list:*');
+      if (keys.length > 0) {
+        await pubClient.del(keys);
+      }
+    } catch (err) {
+      console.error('Redis seen message chat list:', err);
+    }
+
     const user1 = chat.participants[0]?.toString();
     const user2 = chat.participants[1]?.toString();
     getChatList(io, { userId: user1 }, callback);
     getChatList(io, { userId: user2 }, callback);
-  } catch (error: any) {
-    console.log('🚀 ~ SeenMessageHandlers ~ error:', error);
+  } catch (error: any) { 
 
     return callbackFn(callback, {
       success: false,

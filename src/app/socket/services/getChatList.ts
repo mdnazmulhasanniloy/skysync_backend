@@ -3,6 +3,7 @@ import AppError from '../../error/AppError';
 import Chat from '../../modules/chat/chat.models';
 import Message from '../../modules/messages/messages.models';
 import { pubClient } from '../../redis';
+import { Types } from 'mongoose';
 
 export const getMyChatList = async (userId: string) => {
   const chats = await Chat.find({
@@ -37,7 +38,7 @@ export const getMyChatList = async (userId: string) => {
       $match: {
         chat: { $in: chatIds },
         seen: false,
-        sender: { $ne: userId },
+        receiver: new Types.ObjectId(userId),
       },
     },
     {

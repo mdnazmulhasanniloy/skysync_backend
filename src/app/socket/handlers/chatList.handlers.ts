@@ -9,7 +9,7 @@ const getChatList = async (
   callback: (arg: any) => void,
 ) => {
   try {
-    const redisKey = `chat_list:${user.userId}`;
+    const redisKey = `chat_list:${user.userId?.toString()}`;
     const cachedChatList = await pubClient.get(redisKey);
 
     let chatList;

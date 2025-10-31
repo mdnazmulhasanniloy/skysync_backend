@@ -4,7 +4,9 @@ import { homeService } from './home.service';
 import sendResponse from '../../utils/sendResponse';
 
 const getMySchedule = catchAsync(async (req: Request, res: Response) => {
-  req.query.userId = req.user?.userId as string;
+  if (!req.query.userId) {
+    req.query.userId = req.user?.userId as string;
+  }
 
   const schedule = await homeService.getMySchedule(req.query);
 

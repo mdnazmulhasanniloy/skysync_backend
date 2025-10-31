@@ -5,7 +5,7 @@ import { IDnd, IDndModules } from './dnd.interface';
 const dndSchema = new Schema<IDnd>(
   {
       date: {
-        type: String,
+        type: Date,
         required: true,
       },
       remarks: {

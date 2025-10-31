@@ -26,7 +26,7 @@ const withdrawSchema = new Schema<IWithdraw>(
     },
     accNumber: {
       type: Number,
-      required: true, 
+      required: true,
     },
     branchName: {
       type: String,
@@ -35,14 +35,12 @@ const withdrawSchema = new Schema<IWithdraw>(
     routingNumber: {
       type: Number,
       required: false,
-      default: null, 
+      default: null,
     },
     tranId: {
       type: String,
       trim: true,
       default: null,
-      unique: true,
-      sparse: true,
     },
     reason: {
       type: String,
@@ -54,6 +52,6 @@ const withdrawSchema = new Schema<IWithdraw>(
     timestamps: true,
   },
 );
-
+withdrawSchema.index({ tranId: 1 }, { unique: true, sparse: true });
 const Withdraw = model<IWithdraw, IWithdrawModules>('Withdraw', withdrawSchema);
 export default Withdraw;

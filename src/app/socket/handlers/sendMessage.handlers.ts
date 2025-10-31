@@ -16,13 +16,18 @@ const sendMessage = async (
   user: any,
   callback: (args: any) => void,
 ) => {
-  try { 
-    if (!payload?.chat) {
+  try {
+    const isExist = await Chat.findOne({
+      participants: { $all: [payload?.receiver, user?.userId] },
+    });
+    if (!isExist) {
       const chat = await Chat.create({
         participants: [payload?.receiver, user?.userId],
         status: 'accepted',
       });
       payload.chat = chat._id?.toString();
+    } else {
+      payload.chat = isExist._id?.toString();
     }
 
     const message = {

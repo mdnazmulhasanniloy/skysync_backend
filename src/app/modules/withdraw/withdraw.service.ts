@@ -60,7 +60,7 @@ const getAllWithdraw = async (query: Record<string, any>) => {
     query,
   )
     .search(['status'])
-    .filter()
+    .conditionalFilter()
     .paginate()
     .sort()
     .fields();

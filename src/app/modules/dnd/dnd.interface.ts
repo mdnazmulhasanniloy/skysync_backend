@@ -2,7 +2,7 @@ import { Model, ObjectId } from 'mongoose';
 import { IUser } from '../user/user.interface';
 
 export interface IDnd {
-  date: string;
+  date: Date;
   remarks: string;
   user: ObjectId | IUser;
   isDeleted: boolean;
