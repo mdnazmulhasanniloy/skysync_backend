@@ -207,6 +207,14 @@ class StripeServices<T> {
     }
   }
 
+  private n(){
+const name = "hasan"
+  }
+
+  public nn(){
+    return this.n.name
+  }
+
   public async createCustomer(email: string, name: string) {
     try {
       return await this.stripe().customers.create({

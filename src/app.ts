@@ -8,8 +8,20 @@ import express, { Application, Request, Response } from 'express';
 import globalErrorHandler from './app/middleware/globalErrorhandler';
 import notFound from './app/middleware/notfound';
 import router from './app/routes';
-import path from 'path';
+import RedisStore from 'rate-limit-redis';
+import rateLimit from 'express-rate-limit';
+import { pubClient } from './app/redis';
+
+// const limiter = rateLimit({
+//   store: new RedisStore({
+//     sendCommand: (...args: string[]) => pubClient.sendCommand(args),
+//   }),
+//   windowMs: 1 * 60 * 1000, // 1 minis
+//   max: 200, // per minis 200 request
+// });
+
 const app: Application = express();
+// app.use(limiter);
 app.use(express.static('public'));
 app.use(express.json({ limit: '500mb' }));
 app.use(express.urlencoded({ limit: '500mb', extended: true }));

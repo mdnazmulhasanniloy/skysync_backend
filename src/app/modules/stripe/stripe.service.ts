@@ -23,6 +23,7 @@ const stripLinkAccount = async (userId: string) => {
     const accountLink = await StripeService.connectAccount(
       return_url,
       refresh_url,
+      '',
     );
 
     return accountLink.url;
@@ -68,6 +69,7 @@ const refresh = async (paymentId: string, query: Record<string, any>) => {
     const accountLink = await StripeService.connectAccount(
       return_url,
       refresh_url,
+      '',
     );
     return accountLink.url;
   } catch (error: any) {
