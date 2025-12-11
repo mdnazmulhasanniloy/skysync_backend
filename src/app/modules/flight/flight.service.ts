@@ -1,13 +1,17 @@
 import httpStatus from 'http-status';
 import { IFlight } from './flight.interface';
-import Flight from './flight.models'; 
+import Flight from './flight.models';
 import AppError from '../../error/AppError';
 import { pubClient } from '../../redis';
 import { getFlights } from './flight.utils';
 
-const createFlight = async (payload: IFlight) => {
-  const result = await Flight.create(payload);
-  if (!result) {
+const createFlight = async (payload: IFlight | IFlight[]) => {
+  const isArray = Array.isArray(payload);
+  const result = isArray
+    ? await Flight.insertMany(payload)
+    : await Flight.create(payload);
+
+  if (!result || (isArray && (result as any[])?.length === 0)) {
     throw new AppError(httpStatus.BAD_REQUEST, 'Failed to create flight');
   }
 
@@ -19,10 +23,7 @@ const createFlight = async (payload: IFlight) => {
       await pubClient.del(keys);
     }
 
-    // Optionally, clear single flight cache if updating an existing unverified flight
-    if (result?._id) {
-      await pubClient.del('flight:' + result?._id?.toString());
-    }
+    
   } catch (err) {
     console.error('Redis cache invalidation error (createFlight):', err);
   }

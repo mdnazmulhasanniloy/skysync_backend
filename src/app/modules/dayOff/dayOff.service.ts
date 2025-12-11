@@ -5,9 +5,14 @@ import AppError from '../../error/AppError';
 import { pubClient } from '../../redis';
 import QueryBuilder from '../../core/builder/QueryBuilder';
 
-const createDayOff = async (payload: IDayOff) => {
-  const result = await DayOff.create(payload);
-  if (!result) {
+const createDayOff = async (payload: IDayOff | IDayOff[]) => {
+  const isArray = Array.isArray(payload);
+  const result = isArray
+    ? await DayOff.insertMany(payload)
+    : await DayOff.create(payload);
+
+  // await DayOff.create(payload);
+  if (!result || (isArray && (result as any[])?.length === 0)) {
     throw new AppError(httpStatus.BAD_REQUEST, 'Failed to create dayOff');
   }
 
@@ -17,11 +22,6 @@ const createDayOff = async (payload: IDayOff) => {
     const keys = await pubClient.keys('dayOff:*');
     if (keys.length > 0) {
       await pubClient.del(keys);
-    }
-
-    // Optionally, clear single dayOff cache if updating an existing unverified dayOff
-    if (result?._id) {
-      await pubClient.del('dayOff:' + result?._id?.toString());
     }
   } catch (err) {
     console.error('Redis cache invalidation error (createDayOff):', err);

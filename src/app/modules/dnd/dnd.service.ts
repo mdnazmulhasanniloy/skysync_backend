@@ -7,9 +7,13 @@ import QueryBuilder from '../../core/builder/QueryBuilder';
 import moment from 'moment';
 
 const createDnd = async (payload: IDnd) => {
-  payload.date = moment(payload.date).utc().toDate();
-  const result = await Dnd.create(payload);
-  if (!result) {
+  // payload.date = moment(payload.date).utc().toDate();
+  const isArray = Array.isArray(payload);
+  const result = isArray
+    ? await Dnd.insertMany(payload)
+    : await Dnd.create(payload);
+
+  if (!result || (isArray && (result as any[])?.length === 0)) {
     throw new AppError(httpStatus.BAD_REQUEST, 'Failed to create dnd');
   }
 
@@ -19,11 +23,6 @@ const createDnd = async (payload: IDnd) => {
     const keys = await pubClient.keys('dnd:*');
     if (keys.length > 0) {
       await pubClient.del(keys);
-    }
-
-    // Optionally, clear single dnd cache if updating an existing unverified dnd
-    if (result?._id) {
-      await pubClient.del('dnd:' + result?._id?.toString());
     }
   } catch (err) {
     console.error('Redis cache invalidation error (createDnd):', err);

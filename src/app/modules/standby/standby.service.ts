@@ -5,9 +5,13 @@ import AppError from '../../error/AppError';
 import { pubClient } from '../../redis';
 import QueryBuilder from '../../core/builder/QueryBuilder';
 
-const createStandby = async (payload: IStandby) => {
-  const result = await Standby.create(payload);
-  if (!result) {
+const createStandby = async (payload: IStandby | IStandby[]) => {
+  const isArray = Array.isArray(payload);
+  const result = isArray
+    ? await Standby.insertMany(payload)
+    : await Standby.create(payload);
+
+  if (!result || (isArray && (result as any[])?.length === 0)) {
     throw new AppError(httpStatus.BAD_REQUEST, 'Failed to create standby');
   }
 
@@ -17,11 +21,6 @@ const createStandby = async (payload: IStandby) => {
     const keys = await pubClient.keys('standby:*');
     if (keys.length > 0) {
       await pubClient.del(keys);
-    }
-
-    // Optionally, clear single standby cache if updating an existing unverified standby
-    if (result?._id) {
-      await pubClient.del('standby:' + result?._id?.toString());
     }
   } catch (err) {
     console.error('Redis cache invalidation error (createStandby):', err);
