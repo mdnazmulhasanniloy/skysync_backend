@@ -5,11 +5,24 @@ import AppError from '../../error/AppError';
 import { pubClient } from '../../redis';
 import QueryBuilder from '../../core/builder/QueryBuilder';
 
-const createStandby = async (payload: IStandby | IStandby[]) => {
+const createStandby = async (
+  payload: IStandby | IStandby[],
+  userId: string,
+) => {
   const isArray = Array.isArray(payload);
+  const data = isArray
+    ? payload.map(item => ({
+        ...item,
+        user: userId,
+      }))
+    : {
+        ...payload,
+        user: userId,
+      };
+
   const result = isArray
-    ? await Standby.insertMany(payload)
-    : await Standby.create(payload);
+    ? await Standby.insertMany(data)
+    : await Standby.create(data);
 
   if (!result || (isArray && (result as any[])?.length === 0)) {
     throw new AppError(httpStatus.BAD_REQUEST, 'Failed to create standby');

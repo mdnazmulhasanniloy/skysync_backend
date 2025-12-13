@@ -4,9 +4,7 @@ import { flightService } from './flight.service';
 import sendResponse from '../../utils/sendResponse';
 
 const createFlight = catchAsync(async (req: Request, res: Response) => {
-  req.body['user'] = req?.user?.userId;
- 
-  const result = await flightService.createFlight(req.body);
+  const result = await flightService.createFlight(req.body, req.user.userId);
   sendResponse(res, {
     statusCode: 201,
     success: true,

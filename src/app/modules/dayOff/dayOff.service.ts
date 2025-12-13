@@ -5,11 +5,22 @@ import AppError from '../../error/AppError';
 import { pubClient } from '../../redis';
 import QueryBuilder from '../../core/builder/QueryBuilder';
 
-const createDayOff = async (payload: IDayOff | IDayOff[]) => {
+const createDayOff = async (payload: IDayOff | IDayOff[], userId: string) => {
   const isArray = Array.isArray(payload);
+
+  const data = isArray
+    ? payload.map(item => ({
+        ...item,
+        user: userId,
+      }))
+    : {
+        ...payload,
+        user: userId,
+      };
+
   const result = isArray
-    ? await DayOff.insertMany(payload)
-    : await DayOff.create(payload);
+    ? await DayOff.insertMany(data)
+    : await DayOff.create(data);
 
   // await DayOff.create(payload);
   if (!result || (isArray && (result as any[])?.length === 0)) {

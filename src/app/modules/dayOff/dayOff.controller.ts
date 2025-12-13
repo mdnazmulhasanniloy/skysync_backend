@@ -5,9 +5,8 @@ import sendResponse from '../../utils/sendResponse';
 import { storeFile } from '../../utils/fileHelper';
 import { uploadToS3 } from '../../utils/s3';
 
-const createDayOff = catchAsync(async (req: Request, res: Response) => {
-  req.body['user'] = req.user.userId;
-  const result = await dayOffService.createDayOff(req.body);
+const createDayOff = catchAsync(async (req: Request, res: Response) => { 
+  const result = await dayOffService.createDayOff(req.body, req.user.userId);
   sendResponse(res, {
     statusCode: 201,
     success: true,

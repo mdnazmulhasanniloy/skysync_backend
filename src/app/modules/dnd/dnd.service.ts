@@ -6,12 +6,21 @@ import { pubClient } from '../../redis';
 import QueryBuilder from '../../core/builder/QueryBuilder';
 import moment from 'moment';
 
-const createDnd = async (payload: IDnd) => {
+const createDnd = async (payload: IDnd, userId: string) => {
   // payload.date = moment(payload.date).utc().toDate();
   const isArray = Array.isArray(payload);
-  const result = isArray
-    ? await Dnd.insertMany(payload)
-    : await Dnd.create(payload);
+
+  const data = isArray
+    ? payload.map(item => ({
+        ...item,
+        user: userId,
+      }))
+    : {
+        ...payload,
+        user: userId,
+      };
+
+  const result = isArray ? await Dnd.insertMany(data) : await Dnd.create(data);
 
   if (!result || (isArray && (result as any[])?.length === 0)) {
     throw new AppError(httpStatus.BAD_REQUEST, 'Failed to create dnd');

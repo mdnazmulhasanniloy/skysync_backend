@@ -4,8 +4,8 @@ import { dndService } from './dnd.service';
 import sendResponse from '../../utils/sendResponse';
 
 const createDnd = catchAsync(async (req: Request, res: Response) => {
-  req.body['user'] = req?.user?.userId;
-  const result = await dndService.createDnd(req.body);
+ 
+  const result = await dndService.createDnd(req.body, req.user.userId);
   sendResponse(res, {
     statusCode: 201,
     success: true,
