@@ -14,10 +14,12 @@ export const dndValidationSchema = z.object({
     .min(1, 'Remarks cannot be empty'),
 });
 
-const create = z.union([
-  dndValidationSchema,
-  z.array(dndValidationSchema).min(1, 'At least one flight is required'),
-]);
+const create = z.object({
+  body: z.union([
+    dndValidationSchema,
+    z.array(dndValidationSchema).min(1, 'At least one flight is required'),
+  ]),
+});
 
 // const create = z.object({
 //   body: dndValidationSchema,

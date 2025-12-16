@@ -45,10 +45,12 @@ export const flightValidationSchema = z.object({
 // const create = z.object({
 //   body: flightValidationSchema,
 // });
-const create = z.union([
-  flightValidationSchema,
-  z.array(flightValidationSchema).min(1, 'At least one flight is required'),
-]);
+const create = z.object({
+  body: z.union([
+    flightValidationSchema,
+    z.array(flightValidationSchema).min(1, 'At least one flight is required'),
+  ]),
+});
 
 const update = z.object({
   body: flightValidationSchema.deepPartial(),
