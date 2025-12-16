@@ -1,7 +1,6 @@
 import z from 'zod';
 
 export const flightValidationSchema = z.object({
-  
   schedulePeriod: z.object({
     startAt: z
       .string({
@@ -43,13 +42,17 @@ export const flightValidationSchema = z.object({
   isDeleted: z.boolean().optional().default(false),
 });
 
-const create = z.object({
-  body: flightValidationSchema,
-});
+// const create = z.object({
+//   body: flightValidationSchema,
+// });
+const create = z.union([
+  flightValidationSchema,
+  z.array(flightValidationSchema).min(1, 'At least one flight is required'),
+]);
+
 const update = z.object({
   body: flightValidationSchema.deepPartial(),
 });
-
 
 export const flightValidation = {
   create,

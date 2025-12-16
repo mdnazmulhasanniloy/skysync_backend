@@ -1,6 +1,6 @@
 import z from 'zod';
 
-export const dndValidationSchema = z.object({ 
+export const dndValidationSchema = z.object({
   date: z
     .string({
       required_error: 'Date is required',
@@ -12,16 +12,20 @@ export const dndValidationSchema = z.object({
       required_error: 'Remarks are required',
     })
     .min(1, 'Remarks cannot be empty'),
- 
 });
 
-const create = z.object({
-  body: dndValidationSchema,
-});
+const create = z.union([
+  dndValidationSchema,
+  z.array(dndValidationSchema).min(1, 'At least one flight is required'),
+]);
+
+// const create = z.object({
+//   body: dndValidationSchema,
+// });
+
 const update = z.object({
   body: dndValidationSchema.deepPartial(),
 });
-
 
 export const dndValidation = {
   create,

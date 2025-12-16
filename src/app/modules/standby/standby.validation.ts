@@ -26,12 +26,21 @@ export const standbyValidationSchema = z.object({
     .min(1, 'Remarks cannot be empty'),
 });
 
+// const create = z.object({
+//   body: standbyValidationSchema,
+// });
+
 const create = z.object({
-  body: standbyValidationSchema,
+  body: z.union([
+    standbyValidationSchema,
+    z.array(standbyValidationSchema).min(1, 'At least one flight is required'),
+  ]),
 });
+
 const update = z.object({
   body: standbyValidationSchema.deepPartial(),
 });
+
 export const standbyValidation = {
   create,
   update,
