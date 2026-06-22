@@ -1,7 +1,20 @@
 version: '3.8'
 services:
-  redis:
-    image: redis:7.2-alpine
+  app:
+    image: skysyncapp/skysync_backend:latest
+    container_name: skysync_backend
+    restart: always
+    env_file:
+      - .env
+    environment:
+      - REDIS_HOST=skysync_redis
+      - REDIS_PORT=6379
     ports:
-      - 6379:6379
-    command: ['redis-server', '--appendonly', 'yes']
+      - '5000:5000'
+      - '5005:5005'
+    depends_on:
+      - mongo
+      - redis
+    expose:
+      - 5000
+      - 5005

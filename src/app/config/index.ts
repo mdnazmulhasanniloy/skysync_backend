@@ -5,6 +5,8 @@ dotenv.config({ path: path.join((process.cwd(), '.env')) });
 const aws = {
   accessKeyId: process.env.S3_BUCKET_ACCESS_KEY,
   secretAccessKey: process.env.S3_BUCKET_SECRET_ACCESS_KEY,
+  s3BaseUrl: process.env.S3_BASE_URL,
+  s3_api: process.env.S3_API,
   region: process.env.AWS_REGION,
   bucket: process.env.AWS_BUCKET_NAME,
 };
@@ -21,6 +23,9 @@ export default {
   database_url: process.env.DATABASE_URL,
   server_url: process.env.SERVER_URL,
   client_Url: process.env.CLIENT_URL,
+  redis_port: process.env.REDIS_PORT,
+  redis_host: process.env.REDIS_HOST,
+  redis_password: process.env.REDIS_PASSWORD,
   bcrypt_salt_rounds: process.env.BCRYPT_SALT_ROUNDS,
   jwt_access_secret: process.env.JWT_ACCESS_SECRET,
   jwt_refresh_secret: process.env.JWT_REFRESH_SECRET,

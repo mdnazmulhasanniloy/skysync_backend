@@ -34,6 +34,7 @@ export interface IUser {
   businessClassTrained: boolean;
   isDeleted: boolean;
   expireAt: Date;
+  isFreeTrialUsed: boolean;
   verification: {
     otp: string | number;
     expiresAt: Date;

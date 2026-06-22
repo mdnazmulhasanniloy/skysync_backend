@@ -153,7 +153,6 @@ const confirmPayments = async (query: Record<string, any>, res: Response) => {
       paymentDate,
       receipt_url: charge.receipt_url,
     };
-    console.log('🚀 ~ confirmPayments ~ chargeDetails:', chargeDetails);
 
     const oldSubscription = await Subscription.findOne({
       user: payment?.user,
@@ -221,6 +220,19 @@ const confirmPayments = async (query: Record<string, any>, res: Response) => {
       },
       { session },
     );
+
+    const user = await User.findById(subscription?.user).session(session);
+    if (!user?.isFreeTrialUsed) {
+      await User.findByIdAndUpdate(
+        subscription?.user,
+        {
+          isFreeTrialUsed: true,
+        },
+        { session },
+      );
+
+      await StripeService.refund(paymentIntentId);
+    }
 
     const isHaveReferralRewords = await ReferralRewards.findOne({
       referredUser: subscription?.user,

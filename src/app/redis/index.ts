@@ -1,11 +1,25 @@
 import { createClient } from 'redis';
 import colors from 'colors';
 import { Queue } from 'bullmq';
+import config from '../config';
 
-const redisUrl = process.env.REDIS_URL || 'redis://localhost:6379';
+const redisHost = config.redis_host || 'project_format_redis';
+const redisPort = parseInt(config.redis_port || '6379');
+const redisUrl = `redis://${redisHost}:${redisPort}`;
 
-const pubClient = createClient({ url: redisUrl });
-const subClient = pubClient.duplicate();
+const pubClient = createClient({
+  url: redisUrl,
+  password: config.redis_password as string,
+});
+const subClient = pubClient.duplicate({
+  password: config.redis_password as string,
+});
+
+const connection = {
+  host: redisHost,
+  port: redisPort,
+  password: config.redis_password as string,
+};
 
 const connectRedis = async () => {
   await Promise.all([pubClient.connect(), subClient.connect()]);
@@ -14,10 +28,7 @@ const connectRedis = async () => {
 
 // BullMQ Queue (use proper connection object)
 const messageQueue = new Queue('save_messages', {
-  connection: {
-    host: 'localhost',
-    port: 6379,
-  },
+  connection,
 });
 
 // const messageQueue = new Queue('save_messages', {

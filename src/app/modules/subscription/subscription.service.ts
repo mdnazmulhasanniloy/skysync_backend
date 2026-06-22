@@ -10,6 +10,11 @@ import ReferralRewards from '../referralRewards/referralRewards.models';
 import { REFERRAL_REWARDS } from '../referralRewards/referralRewards.constants';
 
 const createSubscription = async (payload: ISubscriptions) => {
+  const user = await User.findById(payload.user);
+
+  if (!user) {
+    throw new AppError(httpStatus.BAD_REQUEST, 'User not found!');
+  }
   const isExist = await Subscription.findOne({
     user: payload.user,
     package: payload.package,
@@ -25,17 +30,20 @@ const createSubscription = async (payload: ISubscriptions) => {
   if (!packages) {
     throw new AppError(httpStatus.BAD_REQUEST, 'Package not found');
   }
- 
-  const isHaveReferralRewords = await ReferralRewards.findOne({
-    referredUser: payload?.user,
-    status: REFERRAL_REWARDS.pending,
-  });
-
-  if (isHaveReferralRewords) {
-    payload.amount = Number(packages?.price) - 5;
-    payload.isFirstTime = true;
+  if (!user?.isFreeTrialUsed) {
+    payload.amount = 0.50;
   } else {
-    payload.amount = packages.price;
+    const isHaveReferralRewords = await ReferralRewards.findOne({
+      referredUser: payload?.user,
+      status: REFERRAL_REWARDS.pending,
+    });
+
+    if (isHaveReferralRewords) {
+      payload.amount = Number(packages?.price) - 5;
+      payload.isFirstTime = true;
+    } else {
+      payload.amount = packages.price;
+    }
   }
 
   const result = await Subscription.create(payload);

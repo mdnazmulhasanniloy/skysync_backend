@@ -90,6 +90,7 @@ const userSchema = new Schema<IUser>(
     },
 
     balance: { type: Number, default: 0 },
+    isFreeTrialUsed: { type: Boolean, default: false },
     points: { type: Number, default: 0 },
     referralCount: { type: Number, default: 0 },
 
