@@ -3,38 +3,39 @@ name: Build & Deploy Backend
 on:
   push:
     branches:
-      - main # or master — change to your branch name
+      - main
 
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
 
     steps:
-      # 1. Checkout source code
+      # 1. Checkout code
       - name: Checkout code
         uses: actions/checkout@v4
 
-        # 2. Create firebase.json from secret
+      # 2. Create firebase.json safely
       - name: Create firebase.json
         run: |
-           echo "${{ secrets.FIREBASE_JSON }}" > firebase.json
+          printf '%s' "${{ secrets.FIREBASE_JSON }}" > firebase.json
 
-      # 2. Log in to Docker Hub
+      # 3. Log in to Docker Hub
       - name: Log in to Docker Hub
         uses: docker/login-action@v3
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
-      # 3. Build and push Docker image
+      # 4. Build and push Docker image
       - name: Build and push Docker image
         uses: docker/build-push-action@v5
         with:
           context: .
           push: true
-          tags: skysyncapp/skysync_app:latest 
+          tags: skysyncapp/skysync_app:latest
+          no-cache: true
 
-      # 4. SSH into server and pull + restart the container
+      # 5. Deploy to server via SSH
       - name: Deploy to server via SSH
         uses: appleboy/ssh-action@v1.0.3
         with:
@@ -43,13 +44,16 @@ jobs:
           key: ${{ secrets.SERVER_SSH_KEY }}
           script: |
             cd /opt/skysync
+
             docker compose pull backend
-            docker compose up -d --no-deps backend
+            docker compose up -d --force-recreate backend
+
             # Health check
             if [ "$(docker inspect -f '{{.State.Running}}' skysync_backend)" = "true" ]; then
               echo "✅ Backend deployed successfully!"
             else
-             echo "❌ Health check failed! Container is not running."
-             exit 1
-            fi   
+              echo "❌ Health check failed!"
+              exit 1
+            fi
+
             docker image prune -f
