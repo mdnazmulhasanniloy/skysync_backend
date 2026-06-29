@@ -1,7 +1,7 @@
 version: '3.8'
 services:
   app:
-    image: skysyncapp/skysync_backend:latest
+    image: nazmulhasn/skysync_backend:latest
     container_name: skysync_backend
     restart: always
     env_file:
