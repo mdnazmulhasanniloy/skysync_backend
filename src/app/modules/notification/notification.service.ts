@@ -45,11 +45,8 @@ const markAsDone = async (id: string) => {
   const result = await Notification.updateMany(
     { receiver: id },
     {
-      $set: {
-        read: true,
-      },
+      read: true,
     },
-    { new: true },
   );
   return result;
 };
