@@ -1,17 +1,14 @@
 {
-  "include": ["src"],
-  "exclude": ["node_modules", "dist", "firebase.json"],
-
   "compilerOptions": {
     "target": "es6",
     "module": "commonjs",
-    "rootDir": "./src",
+    "rootDir": "src",
+    "outDir": "dist",
     "moduleResolution": "node",
-    "resolveJsonModule": true,
-    "outDir": "./dist",
     "esModuleInterop": true,
-    "forceConsistentCasingInFileNames": true,
     "strict": true,
     "skipLibCheck": true
-  }
+  },
+  "include": ["src/**/*.ts"],
+  "exclude": ["node_modules", "dist", "**/*.json"]
 }
