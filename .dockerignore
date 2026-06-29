@@ -1,6 +1,5 @@
 node_modules
 dist
-firebase.json
 *.json
 .git
 generateFolder.ts
