@@ -6,3 +6,4 @@ logs/
 nn.ts
 firebase.json
 dist
+generateFolder.ts

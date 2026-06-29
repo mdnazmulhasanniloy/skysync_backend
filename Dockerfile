@@ -2,34 +2,38 @@
 FROM node:22-alpine AS builder
 WORKDIR /app
 
-# copy package.json + package-lock.json
-COPY ./package*.json ./
-COPY ./public ./public 
+RUN corepack enable && corepack prepare pnpm@10.30.1 --activate
+
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml firebase.json ./
+COPY public ./public
 
 # install dev dependencies
 RUN npm ci
 
-# copy all source files
+ 
+RUN pnpm install --frozen-lockfile
 COPY . .
-
-# build the app
-RUN npm run build
+# Build your project
+RUN pnpm build
 
 # ---------- STAGE 2: PRODUCTION ---------- 
 FROM node:22-alpine
 
 WORKDIR /app
 
-COPY package*.json ./
-COPY ./public ./public 
+RUN corepack enable && corepack prepare pnpm@10.30.1 --activate
 
-# IMPORTANT: install ALL deps (not only production)
-RUN npm ci
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml firebase.json ./
+
+RUN pnpm install --frozen-lockfile --prod=false
 
 COPY --from=builder /app/dist ./dist
-COPY --from=builder /app/firebase.json ./firebase.json
+COPY --from=builder /app/public ./public 
+COPY --from=builder /app/bin ./bin 
 
-EXPOSE 5000
-EXPOSE 5005
+COPY start.sh ./start.sh
+RUN chmod +x ./start.sh 
 
-CMD ["node", "dist/server.js"]
+EXPOSE 5000 5005
+
+CMD ["sh", "start.sh"]
