@@ -33,7 +33,6 @@ RUN pnpm install --frozen-lockfile --prod
 # Copy build artifacts
 COPY --from=builder /app/dist ./dist
 COPY --from=builder /app/public ./public
-COPY --from=builder /app/bin ./bin
 
 COPY start.sh ./start.sh
 RUN chmod +x ./start.sh
