@@ -16,6 +16,7 @@ export type IFilter = {
   [key: string]: any;
 };
 const createUser = async (payload: IUser): Promise<IUser> => {
+  console.log(payload);
   let referredBy;
   const isExist = await User.isUserExist(payload.email as string);
 

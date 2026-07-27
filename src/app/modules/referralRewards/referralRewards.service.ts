@@ -1,8 +1,6 @@
 import httpStatus from 'http-status';
-import { IReferralRewards } from './referralRewards.interface';
 import ReferralRewards from './referralRewards.models';
 import AppError from '../../error/AppError';
-import { pubClient } from '../../redis';
 import QueryBuilder from '../../core/builder/QueryBuilder';
 
 // const createReferralRewards = async (payload: IReferralRewards) => {

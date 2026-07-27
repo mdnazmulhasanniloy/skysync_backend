@@ -1,6 +1,6 @@
-import { Model, ObjectId } from 'mongoose';
-import { IPackage } from '../package/package.interface';
+import { Model, ObjectId } from 'mongoose'; 
 import { IUser } from '../user/user.interface';
+import { IPackage } from '../package/package.interface';
 
 export interface ISubscriptions {
   _id?: ObjectId | string;

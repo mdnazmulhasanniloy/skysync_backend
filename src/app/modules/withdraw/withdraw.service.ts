@@ -2,7 +2,6 @@ import httpStatus from 'http-status';
 import { IWithdraw } from './withdraw.interface';
 import Withdraw from './withdraw.models';
 import AppError from '../../error/AppError';
-import { pubClient } from '../../redis';
 import { User } from '../user/user.models';
 import moment from 'moment';
 import QueryBuilder from '../../core/builder/QueryBuilder';

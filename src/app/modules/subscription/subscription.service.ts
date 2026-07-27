@@ -31,7 +31,7 @@ const createSubscription = async (payload: ISubscriptions) => {
     throw new AppError(httpStatus.BAD_REQUEST, 'Package not found');
   }
   if (!user?.isFreeTrialUsed) {
-    payload.amount = 0.50;
+    payload.amount = 0.5;
   } else {
     const isHaveReferralRewords = await ReferralRewards.findOne({
       referredUser: payload?.user,

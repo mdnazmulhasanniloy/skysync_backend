@@ -1,4 +1,7 @@
-/* eslint-disable @typescript-eslint/ban-ts-comment */
+import dns from 'dns';
+// Force Google DNS servers before any connection attempt
+dns.setServers(['8.8.8.8', '1.1.1.1', '8.8.4.4']);
+dns.setDefaultResultOrder('ipv4first');
 import { createServer, Server } from 'http';
 import mongoose from 'mongoose';
 import app from './app';

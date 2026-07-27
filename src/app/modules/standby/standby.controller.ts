@@ -2,10 +2,8 @@ import { Request, Response } from 'express';
 import catchAsync from '../../utils/catchAsync';
 import { standbyService } from './standby.service';
 import sendResponse from '../../utils/sendResponse';
-import { storeFile } from '../../utils/fileHelper';
-import { uploadToS3 } from '../../utils/s3';
 
-const createStandby = catchAsync(async (req: Request, res: Response) => { 
+const createStandby = catchAsync(async (req: Request, res: Response) => {
   const result = await standbyService.createStandby(req.body, req.user.userId);
   sendResponse(res, {
     statusCode: 201,

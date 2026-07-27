@@ -46,7 +46,6 @@ const getSubscriptionById = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
-
 const getSubscriptionByUserId = catchAsync(
   async (req: Request, res: Response) => {
     const result = await subscriptionService.getSubscriptionByUserId(

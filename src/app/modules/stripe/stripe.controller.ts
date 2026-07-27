@@ -1,8 +1,8 @@
 import { Request, Response } from 'express';
+import httpStatus from 'http-status';
 import catchAsync from '../../utils/catchAsync';
 import { stripeService } from './stripe.service';
 import sendResponse from '../../utils/sendResponse';
-import httpStatus from 'http-status';
 
 const stripLinkAccount = catchAsync(async (req: Request, res: Response) => {
   const result = await stripeService.stripLinkAccount(req?.user?.userId);

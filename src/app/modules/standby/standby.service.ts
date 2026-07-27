@@ -2,7 +2,7 @@ import httpStatus from 'http-status';
 import { IStandby } from './standby.interface';
 import Standby from './standby.models';
 import AppError from '../../error/AppError';
-import { pubClient } from '../../redis';
+import { pubClient } from '../../redis/index';
 import QueryBuilder from '../../core/builder/QueryBuilder';
 
 const createStandby = async (

@@ -2,6 +2,7 @@ node_modules
 logs/
 **/logs/
 .env
+.env.example
 .vercel
 nn.ts
 firebase.json

@@ -1,9 +1,8 @@
-import Stripe from 'stripe';
-import config from '../../config';
+import httpStatus from 'http-status';
 import { User } from '../user/user.models';
 import AppError from '../../error/AppError';
-import httpStatus from 'http-status';
 import StripeService from '../../core/stripe/stripe';
+import config from '../../config/index';
 
 // Create Stripe account and return the account link URL
 const stripLinkAccount = async (userId: string) => {

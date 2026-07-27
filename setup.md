@@ -7,7 +7,7 @@
 Build new Production Image:
 
 ```sh
-docker build -t nazmulhasn/skysync_app:latest .
+docker build -t nazmulhasn/skysync_backend:latest .
 ```
 
 ---
@@ -15,7 +15,7 @@ docker build -t nazmulhasn/skysync_app:latest .
 ## 2. Push to Docker Hub
 
 ```sh
-docker push nazmulhasn/skysync_app:latest
+docker push nazmulhasn/skysync_backend:latest
 ```
 
 ## 3. Other computer/server: pull new image

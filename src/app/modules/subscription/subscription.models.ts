@@ -1,5 +1,8 @@
 import { model, Schema } from 'mongoose';
-import { ISubscriptions, ISubscriptionsModel } from './subscription.interface';
+import {
+  ISubscriptions,
+  ISubscriptionsModel,
+} from './subscription.interface';
 
 // Define the Mongoose schema
 const SubscriptionsSchema = new Schema<ISubscriptions>(
