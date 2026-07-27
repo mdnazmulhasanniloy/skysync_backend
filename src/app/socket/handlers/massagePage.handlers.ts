@@ -42,7 +42,7 @@ const MessagePageHandlers = async (
         JSON.stringify(receiverDetails),
       );
     }
-    console.log(receiverDetails);
+    
     if (!receiverDetails) {
       return;
     }

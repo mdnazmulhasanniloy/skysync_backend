@@ -34,7 +34,7 @@ class StripeServices<T> {
     refreshUrl: string,
     accountId: string,
   ) {
-    console.log({ returnUrl, refreshUrl, accountId });
+   
     try {
       const accountLink = await this.stripe().accountLinks.create({
         account: accountId,
@@ -78,7 +78,7 @@ class StripeServices<T> {
       );
 
       if (availableBalance < amount) {
-        console.log('Insufficient funds to cover the transfer.');
+        
         throw new Error('Insufficient funds to cover the transfer.');
       }
 

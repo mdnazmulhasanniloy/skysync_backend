@@ -34,9 +34,7 @@ app.use(
 
 // application routes
 app.use('/api/v1', router);
-app.get('/webhook', async (req, res) => {
-  console.log({ params: req.params, query: req.query, body: req.body });
-});
+ 
 app.get('/', (req: Request, res: Response) => {
   res.send('server is running');
 });

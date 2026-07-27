@@ -4,10 +4,8 @@ import Standby from '../standby/standby.models';
 import Dnd from '../dnd/dnd.models';
 import DayOff from '../dayOff/dayOff.models';
 import now from '../../utils/now';
-import { IDayOff } from '../dayOff/dayOff.interface';
 import pickQuery from '../../utils/pickQuery';
 import { User } from '../user/user.models';
-import { Types } from 'mongoose';
 import { paginationHelper } from '../../helpers/pagination.helpers';
 
 // export const getMySchedule = async (query: Record<string, any>) => {
@@ -329,7 +327,6 @@ const standByFilter = async (query: Record<string, any>) => {
   //   const startAt = now(moment(lookingFor).startOf('day')).toDate();
   //   const endAt = now(moment(lookingFor).endOf('day')).toDate();
 
-  //   console.log(lookingFor);
   //   pipeline.push({
   //     $match: {
   //       date: {
@@ -377,7 +374,7 @@ const standByFilter = async (query: Record<string, any>) => {
         },
       },
     ]).then(data => (data?.length > 0 ? data[0]?.userIds : []));
-    console.log(userIdes);
+
     pipeline.push({
       $match: {
         user: {

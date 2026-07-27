@@ -125,7 +125,7 @@ class QueryBuilder<T> {
             });
           } else if (value.includes('!')) {
             const [, v] = value.split('!');
-            console.log(v);
+            
             this.modelQuery = this.modelQuery.find({
               [key]: { $ne: v },
             });

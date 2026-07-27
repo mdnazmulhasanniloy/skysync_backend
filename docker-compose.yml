@@ -18,3 +18,4 @@ services:
     expose:
       - 5000
       - 5005
+  

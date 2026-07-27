@@ -120,6 +120,7 @@ const resendOtp = async (email: string) => {
     'Your One Time OTP',
     fs
       .readFileSync(otpEmailPath, 'utf8')
+      .replace('{{fullName}}', user?.name ?? '')
       .replace('{{otp}}', otp)
       .replace('{{email}}', user?.email)
       .replace(
@@ -184,7 +185,7 @@ const verifyLink = async (query: Record<string, any>) => {
   const updateUser = await User.findByIdAndUpdate(
     user?._id,
     {
-      $set: { 
+      $set: {
         verification: {
           otp: 0,
           expiresAt: null,

@@ -46,8 +46,7 @@ const sendMessage = async (
       pubClient.hGet('userId_to_socketId', message.sender?.toString()),
       pubClient.hGet('userId_to_socketId', message.receiver?.toString()),
     ])) as string[];
-    console.log('🚀 ~ sendMessage ~ receiverSocketId:', receiverSocketId);
-    console.log('🚀 ~ sendMessage ~ senderSocketId:', senderSocketId);
+   
     io.to(senderSocketId).emit('new_message', { message });
     io.to(receiverSocketId).emit('new_message', { message });
     getChatList(io, { _id: payload.sender }, callback);

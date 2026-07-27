@@ -169,8 +169,8 @@ const forgotPassword = async (email: string) => {
     'Your reset password OTP is',
     fs
       .readFileSync(otpEmailPath, 'utf8')
+      .replace('{{fullName}}', user?.name ?? '')
       .replace('{{otp}}', otp)
-      .replace('{{fullName}}', user?.name)
       .replace(
         '{{resetUrl}}',
         `${config.server_url}/auth/reset-password-page?token=${token}`.trim(),
@@ -197,7 +197,6 @@ const resetPassword = async (token: string, payload: TResetPassword) => {
   const user: IUser | null = await User.findById(decode?.userId).select(
     'isDeleted verification',
   );
-  console.log('🚀 ~ resetPassword ~ user:', user);
 
   if (!user) {
     throw new AppError(httpStatus.NOT_FOUND, 'User not found');
@@ -270,7 +269,7 @@ const googleLogin = async (payload: any, req: Request) => {
     const decodedToken: DecodedIdToken | null = await firebaseAdmin
       .auth()
       .verifyIdToken(payload?.token);
-    console.log(JSON.stringify(decodedToken));
+ 
     if (!decodedToken)
       throw new AppError(httpStatus.BAD_REQUEST, 'Invalid token');
 
